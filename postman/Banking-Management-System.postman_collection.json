@@ -1,0 +1,485 @@
+{
+  "info": {
+    "_postman_id": "bms-collection-v1",
+    "name": "Banking Management System",
+    "description": "Complete API collection for Banking Management System.\nBuilt with Spring Boot 3.x, PostgreSQL, JPA/Hibernate.\n\nAuthor: Vaibhavi Shingade\nBase URL: http://localhost:8080\n\nTesting Order:\n1. Create Customer\n2. Create Account\n3. Deposit\n4. Withdrawal\n5. Transfer\n6. Transaction History",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "customerId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "accountNumber1",
+      "value": "ACC100001",
+      "type": "string"
+    },
+    {
+      "key": "accountNumber2",
+      "value": "ACC100002",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Customer Management",
+      "item": [
+        {
+          "name": "Create Customer",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Prasad\",\n  \"lastName\": \"Mahajan\",\n  \"email\": \"prasad.mahajan@email.com\",\n  \"phone\": \"9876543210\",\n  \"address\": \"Pune, Maharashtra, India\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/customers",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "customers"]
+            },
+            "description": "Creates a new bank customer.\nReturns 201 CREATED with customer details including auto-generated customerCode."
+          },
+          "response": [
+            {
+              "name": "201 Created — Success",
+              "originalRequest": {
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"firstName\": \"Prasad\",\n  \"lastName\": \"Mahajan\",\n  \"email\": \"prasad.mahajan@email.com\",\n  \"phone\": \"9876543210\",\n  \"address\": \"Pune, Maharashtra, India\"\n}"
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "body": "{\n  \"id\": 1,\n  \"customerCode\": \"CUST-0001\",\n  \"firstName\": \"Prasad\",\n  \"lastName\": \"Mahajan\",\n  \"email\": \"prasad.mahajan@email.com\",\n  \"phone\": \"9876543210\",\n  \"address\": \"Pune, Maharashtra, India\",\n  \"createdAt\": \"2026-08-25T12:30:00\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Create Second Customer",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Rohit\",\n  \"lastName\": \"Sharma\",\n  \"email\": \"rohit.sharma@email.com\",\n  \"phone\": \"9988776655\",\n  \"address\": \"Mumbai, Maharashtra, India\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/customers",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "customers"]
+            }
+          }
+        },
+        {
+          "name": "Get All Customers",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/customers",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "customers"]
+            }
+          }
+        },
+        {
+          "name": "Get Customer by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/customers/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "customers", "1"]
+            }
+          }
+        },
+        {
+          "name": "Update Customer",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Prasad\",\n  \"lastName\": \"Mahajan\",\n  \"email\": \"prasad.mahajan@email.com\",\n  \"phone\": \"9876543210\",\n  \"address\": \"Nagpur, Maharashtra, India\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/customers/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "customers", "1"]
+            }
+          }
+        },
+        {
+          "name": "Delete Customer",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/customers/2",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "customers", "2"]
+            },
+            "description": "Returns 204 NO CONTENT on success. No response body."
+          }
+        },
+        {
+          "name": "Create Customer — Validation Error",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"\",\n  \"lastName\": \"Test\",\n  \"email\": \"not-an-email\",\n  \"phone\": \"123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/customers",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "customers"]
+            },
+            "description": "Expected: 400 Bad Request with validationErrors map"
+          }
+        },
+        {
+          "name": "Create Customer — Duplicate Email",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Another\",\n  \"lastName\": \"Person\",\n  \"email\": \"prasad.mahajan@email.com\",\n  \"phone\": \"9876543211\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/customers",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "customers"]
+            },
+            "description": "Expected: 409 Conflict — duplicate email"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Account Management",
+      "item": [
+        {
+          "name": "Create Savings Account (Customer 1)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": 1,\n  \"accountType\": \"SAVINGS\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/accounts",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "accounts"]
+            },
+            "description": "Creates ACC100001 for customer 1. Starts with balance 0."
+          }
+        },
+        {
+          "name": "Create Savings Account (Customer 2)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": 2,\n  \"accountType\": \"SAVINGS\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/accounts",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "accounts"]
+            }
+          }
+        },
+        {
+          "name": "Get All Accounts",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/accounts",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "accounts"]
+            }
+          }
+        },
+        {
+          "name": "Get Account by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/accounts/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "accounts", "1"]
+            }
+          }
+        },
+        {
+          "name": "Get Account by Number",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/accounts/number/{{accountNumber1}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "accounts", "number", "{{accountNumber1}}"]
+            }
+          }
+        },
+        {
+          "name": "Block Account",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"BLOCKED\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/accounts/1/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "accounts", "1", "status"]
+            }
+          }
+        },
+        {
+          "name": "Activate Account",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ACTIVE\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/accounts/1/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "accounts", "1", "status"]
+            }
+          }
+        },
+        {
+          "name": "Close Account",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"CLOSED\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/accounts/2/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "accounts", "2", "status"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Transactions",
+      "item": [
+        {
+          "name": "Deposit to ACC100001",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 50000,\n  \"description\": \"Salary credit August 2026\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/accounts/{{accountNumber1}}/deposit",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "accounts", "{{accountNumber1}}", "deposit"]
+            },
+            "description": "Deposits ₹50,000 into ACC100001"
+          }
+        },
+        {
+          "name": "Deposit to ACC100002",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 20000,\n  \"description\": \"Initial deposit\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/accounts/{{accountNumber2}}/deposit",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "accounts", "{{accountNumber2}}", "deposit"]
+            }
+          }
+        },
+        {
+          "name": "Withdraw from ACC100001",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 10000,\n  \"description\": \"ATM withdrawal\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/accounts/{{accountNumber1}}/withdraw",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "accounts", "{{accountNumber1}}", "withdraw"]
+            }
+          }
+        },
+        {
+          "name": "Withdraw — Insufficient Balance (MUST FAIL)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 9999999,\n  \"description\": \"Should fail\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/accounts/{{accountNumber1}}/withdraw",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "accounts", "{{accountNumber1}}", "withdraw"]
+            },
+            "description": "Expected: 400 Bad Request — InsufficientBalanceException"
+          }
+        },
+        {
+          "name": "Transfer ACC100001 → ACC100002",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fromAccount\": \"{{accountNumber1}}\",\n  \"toAccount\": \"{{accountNumber2}}\",\n  \"amount\": 15000,\n  \"description\": \"Rent payment August 2026\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transactions/transfer",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "transactions", "transfer"]
+            },
+            "description": "Atomic transfer between two accounts. Both balances update or neither does."
+          }
+        },
+        {
+          "name": "Transfer — Same Account (MUST FAIL)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fromAccount\": \"{{accountNumber1}}\",\n  \"toAccount\": \"{{accountNumber1}}\",\n  \"amount\": 1000,\n  \"description\": \"Should fail\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transactions/transfer",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "transactions", "transfer"]
+            },
+            "description": "Expected: 400 Bad Request — InvalidTransactionException"
+          }
+        },
+        {
+          "name": "Transfer — Insufficient Balance (MUST FAIL)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fromAccount\": \"{{accountNumber1}}\",\n  \"toAccount\": \"{{accountNumber2}}\",\n  \"amount\": 9999999,\n  \"description\": \"Should fail\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transactions/transfer",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "transactions", "transfer"]
+            },
+            "description": "Expected: 400 Bad Request — InsufficientBalanceException"
+          }
+        },
+        {
+          "name": "Transaction History — All",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/accounts/{{accountNumber1}}/transactions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "accounts", "{{accountNumber1}}", "transactions"]
+            },
+            "description": "Returns all transactions for ACC100001, sorted newest first."
+          }
+        },
+        {
+          "name": "Transaction History — Filter by DEPOSIT",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/accounts/{{accountNumber1}}/transactions?transactionType=DEPOSIT",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "accounts", "{{accountNumber1}}", "transactions"],
+              "query": [
+                { "key": "transactionType", "value": "DEPOSIT" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Transaction History — Filter by Date Range",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/accounts/{{accountNumber1}}/transactions?fromDate=2026-01-01T00:00:00&toDate=2026-12-31T23:59:59",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "accounts", "{{accountNumber1}}", "transactions"],
+              "query": [
+                { "key": "fromDate", "value": "2026-01-01T00:00:00" },
+                { "key": "toDate", "value": "2026-12-31T23:59:59" }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

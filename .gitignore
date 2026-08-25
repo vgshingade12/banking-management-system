@@ -1,0 +1,43 @@
+# ============================================================
+#  .gitignore — Banking Management System
+# ============================================================
+
+# Maven build output
+target/
+*.class
+
+# IDE files
+.idea/
+*.iml
+.vscode/
+*.code-workspace
+*.classpath
+*.project
+.settings/
+
+# Environment / Secrets — NEVER commit these
+.env
+*.env
+
+# Application properties with real credentials
+# Add custom profile properties here if needed
+application-local.properties
+application-prod.properties
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# IntelliJ
+out/
+
+# Spring Boot executable JAR (already in target/)
+*.jar
+*.war
+
+# Test reports
+surefire-reports/
