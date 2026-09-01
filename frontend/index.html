@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ApexBank — Core Banking Management System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../src/main/resources/static/styles.css">
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen">
+  
+  <div class="app-layout flex min-h-screen">
+
+    <!-- Sidebar Navigation -->
+    <aside class="w-64 bg-slate-900 border-r border-slate-800 flex flex-col justify-between p-4 fixed h-full z-20">
+      <div>
+        <!-- Brand Logo -->
+        <div class="brand flex items-center gap-3 px-3 py-4 mb-6">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-cyan-500 to-emerald-400 flex items-center justify-center shadow-lg shadow-indigo-500/20 text-white font-black text-xl">
+            <i class="fa-solid font-bold fa-building-columns"></i>
+          </div>
+          <div>
+            <h1 class="font-outfit font-extrabold text-xl tracking-tight text-white leading-none">ApexBank</h1>
+            <span class="text-xs font-medium text-cyan-400 tracking-wider uppercase">Core Engine v1.0</span>
+          </div>
+        </div>
+
+        <!-- Navigation Menu -->
+        <nav class="space-y-1.5">
+          <button class="nav-item active" data-tab="tab-overview">
+            <i class="fa-solid fa-chart-pie"></i>
+            <span>Dashboard</span>
+          </button>
+          <button class="nav-item" data-tab="tab-customers">
+            <i class="fa-solid fa-users"></i>
+            <span>Customers</span>
+          </button>
+          <button class="nav-item" data-tab="tab-accounts">
+            <i class="fa-solid fa-wallet"></i>
+            <span>Accounts</span>
+          </button>
+          <button class="nav-item" data-tab="tab-operations">
+            <i class="fa-solid fa-money-bill-transfer"></i>
+            <span>Banking Ops</span>
+          </button>
+          <button class="nav-item" data-tab="tab-ledger">
+            <i class="fa-solid fa-receipt"></i>
+            <span>Transaction Ledger</span>
+          </button>
+        </nav>
+      </div>
+
+      <!-- System Status Footer -->
+      <div class="space-y-3 pt-4 border-t border-slate-800">
+        <a href="http://localhost:8080/h2-console" target="_blank" class="flex items-center justify-between p-2.5 rounded-lg bg-slate-800/60 hover:bg-slate-800 text-xs font-medium text-slate-300 hover:text-cyan-400 transition-colors border border-slate-700/50">
+          <span class="flex items-center gap-2">
+            <i class="fa-solid fa-database text-amber-400"></i> H2 DB Console
+          </span>
+          <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+        </a>
+        <div class="flex items-center justify-between px-3 py-2 rounded-lg bg-slate-950/80 border border-slate-800 text-xs">
+          <span class="flex items-center gap-2 text-slate-400">
+            <span class="relative flex h-2.5 w-2.5">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+            </span>
+            Backend API
+          </span>
+          <span id="api-status-tag" class="text-emerald-400 font-semibold">ONLINE</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 ml-64 p-8 min-h-screen">
+
+      <!-- Header Topbar -->
+      <header class="flex items-center justify-between pb-6 mb-8 border-b border-slate-800">
+        <div>
+          <h2 id="page-title" class="font-outfit text-2xl font-bold text-white tracking-tight">Dashboard Overview</h2>
+          <p id="page-subtitle" class="text-slate-400 text-sm mt-0.5">Real-time telemetry and management controls for ApexBank Core.</p>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <button id="btn-refresh" class="btn btn-secondary text-xs">
+            <i class="fa-solid fa-arrows-rotate"></i> Refresh
+          </button>
+          <button class="btn btn-primary text-xs" id="btn-quick-customer">
+            <i class="fa-solid fa-user-plus"></i> New Customer
+          </button>
+          <button class="btn btn-emerald text-xs" id="btn-quick-account">
+            <i class="fa-solid fa-plus-circle"></i> Open Account
+          </button>
+        </div>
+      </header>
+
+      <!-- TAB 1: OVERVIEW -->
+      <section id="tab-overview" class="tab-content active space-y-8">
+        <!-- Stats Summary Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div class="stat-card">
+            <div class="flex items-center justify-between">
+              <span class="stat-label">Total Customers</span>
+              <div class="stat-icon bg-indigo-500/10 text-indigo-400">
+                <i class="fa-solid fa-users"></i>
+              </div>
+            </div>
+            <div class="stat-value" id="stat-customers">0</div>
+            <div class="stat-footer text-emerald-400">
+              <i class="fa-solid fa-check"></i> Registered Clients
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="flex items-center justify-between">
+              <span class="stat-label">Active Accounts</span>
+              <div class="stat-icon bg-cyan-500/10 text-cyan-400">
+                <i class="fa-solid fa-wallet"></i>
+              </div>
+            </div>
+            <div class="stat-value" id="stat-accounts">0</div>
+            <div class="stat-footer text-cyan-400">
+              <i class="fa-solid fa-shield-halved"></i> Savings & Current
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="flex items-center justify-between">
+              <span class="stat-label">Total System Liquidity</span>
+              <div class="stat-icon bg-emerald-500/10 text-emerald-400">
+                <i class="fa-solid fa-indian-rupee-sign"></i>
+              </div>
+            </div>
+            <div class="stat-value text-emerald-400" id="stat-liquidity">₹0.00</div>
+            <div class="stat-footer text-emerald-400">
+              <i class="fa-solid fa-arrow-trend-up"></i> Combined Ledger Funds
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="flex items-center justify-between">
+              <span class="stat-label">Engine Mode</span>
+              <div class="stat-icon bg-amber-500/10 text-amber-400">
+                <i class="fa-solid fa-bolt"></i>
+              </div>
+            </div>
+            <div class="stat-value text-amber-400 text-xl font-bold pt-1">Spring H2 DB</div>
+            <div class="stat-footer text-slate-400">
+              <i class="fa-solid fa-circle-info"></i> Spring Boot 3.3 ACID @Transactional
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Launch Action Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="quick-action-card hover:border-emerald-500/40" onclick="switchTab('tab-operations', 'deposit')">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-xl font-bold">
+                <i class="fa-solid fa-arrow-down-left"></i>
+              </div>
+              <div>
+                <h4 class="text-base font-bold text-white">Deposit Cash</h4>
+                <p class="text-xs text-slate-400">Instant credit to customer account</p>
+              </div>
+            </div>
+            <i class="fa-solid fa-chevron-right text-slate-600 group-hover:text-emerald-400"></i>
+          </div>
+
+          <div class="quick-action-card hover:border-amber-500/40" onclick="switchTab('tab-operations', 'withdraw')">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center text-xl font-bold">
+                <i class="fa-solid fa-arrow-up-right"></i>
+              </div>
+              <div>
+                <h4 class="text-base font-bold text-white">Withdraw Funds</h4>
+                <p class="text-xs text-slate-400">Debit account with balance check</p>
+              </div>
+            </div>
+            <i class="fa-solid fa-chevron-right text-slate-600 group-hover:text-amber-400"></i>
+          </div>
+
+          <div class="quick-action-card hover:border-indigo-500/40" onclick="switchTab('tab-operations', 'transfer')">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center text-xl font-bold">
+                <i class="fa-solid fa-right-left"></i>
+              </div>
+              <div>
+                <h4 class="text-base font-bold text-white">Inter-Account Transfer</h4>
+                <p class="text-xs text-slate-400">Atomic money transfer between accounts</p>
+              </div>
+            </div>
+            <i class="fa-solid fa-chevron-right text-slate-600 group-hover:text-indigo-400"></i>
+          </div>
+        </div>
+
+        <!-- Recent Accounts Section -->
+        <div class="glass-card p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-outfit text-lg font-bold text-white">Active Accounts Summary</h3>
+            <button class="text-xs font-semibold text-cyan-400 hover:text-cyan-300" onclick="switchTab('tab-accounts')">
+              View All Accounts <i class="fa-solid fa-arrow-right ml-1"></i>
+            </button>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+              <thead class="text-xs uppercase text-slate-400 bg-slate-900/60 border-b border-slate-800">
+                <tr>
+                  <th class="py-3 px-4">Account Number</th>
+                  <th class="py-3 px-4">Customer Name</th>
+                  <th class="py-3 px-4">Account Type</th>
+                  <th class="py-3 px-4 text-right">Balance</th>
+                  <th class="py-3 px-4 text-center">Status</th>
+                  <th class="py-3 px-4 text-right">Quick Action</th>
+                </tr>
+              </thead>
+              <tbody id="overview-accounts-body" class="divide-y divide-slate-800/50">
+                <tr><td colspan="6" class="text-center py-6 text-slate-500">Loading accounts...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 2: CUSTOMERS -->
+      <section id="tab-customers" class="tab-content space-y-6">
+        <div class="glass-card p-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <div>
+              <h3 class="font-outfit text-lg font-bold text-white">Registered Customer Directory</h3>
+              <p class="text-xs text-slate-400">Manage bank customer profiles and contact credentials.</p>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                <input type="text" id="search-customers" placeholder="Search by name, email, phone..." class="input-field pl-9 text-xs w-64">
+              </div>
+              <button class="btn btn-primary text-xs" onclick="openModal('modal-customer')">
+                <i class="fa-solid fa-user-plus"></i> Add Customer
+              </button>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+              <thead class="text-xs uppercase text-slate-400 bg-slate-900/60 border-b border-slate-800">
+                <tr>
+                  <th class="py-3 px-4">ID</th>
+                  <th class="py-3 px-4">Code</th>
+                  <th class="py-3 px-4">Customer Name</th>
+                  <th class="py-3 px-4">Email Address</th>
+                  <th class="py-3 px-4">Phone Number</th>
+                  <th class="py-3 px-4">Address</th>
+                  <th class="py-3 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="customers-table-body" class="divide-y divide-slate-800/50">
+                <tr><td colspan="7" class="text-center py-6 text-slate-500">Loading customers...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: ACCOUNTS -->
+      <section id="tab-accounts" class="tab-content space-y-6">
+        <div class="glass-card p-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <div>
+              <h3 class="font-outfit text-lg font-bold text-white">Bank Accounts Master Ledger</h3>
+              <p class="text-xs text-slate-400">Manage savings and current accounts, balances, and account statuses.</p>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                <input type="text" id="search-accounts" placeholder="Search by account number..." class="input-field pl-9 text-xs w-64">
+              </div>
+              <button class="btn btn-emerald text-xs" onclick="openModal('modal-account')">
+                <i class="fa-solid fa-plus-circle"></i> Open New Account
+              </button>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+              <thead class="text-xs uppercase text-slate-400 bg-slate-900/60 border-b border-slate-800">
+                <tr>
+                  <th class="py-3 px-4">Account Number</th>
+                  <th class="py-3 px-4">Customer</th>
+                  <th class="py-3 px-4">Type</th>
+                  <th class="py-3 px-4 text-right">Current Balance</th>
+                  <th class="py-3 px-4 text-center">Status</th>
+                  <th class="py-3 px-4">Created Date</th>
+                  <th class="py-3 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="accounts-table-body" class="divide-y divide-slate-800/50">
+                <tr><td colspan="7" class="text-center py-6 text-slate-500">Loading accounts...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 4: BANKING OPERATIONS -->
+      <section id="tab-operations" class="tab-content space-y-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
+          <!-- Sub Navigation for Ops -->
+          <div class="lg:col-span-1 glass-card p-5 space-y-3">
+            <h3 class="font-outfit font-bold text-base text-white mb-2">Banking Service Counter</h3>
+            <button class="ops-nav-btn active" data-subtab="subtab-deposit">
+              <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+                <i class="fa-solid fa-arrow-down-left"></i>
+              </div>
+              <div class="text-left">
+                <div class="font-bold text-white text-sm">Cash Deposit</div>
+                <div class="text-xs text-slate-400">Credit money to account</div>
+              </div>
+            </button>
+
+            <button class="ops-nav-btn" data-subtab="subtab-withdraw">
+              <div class="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center">
+                <i class="fa-solid fa-arrow-up-right"></i>
+              </div>
+              <div class="text-left">
+                <div class="font-bold text-white text-sm">Cash Withdrawal</div>
+                <div class="text-xs text-slate-400">Debit money from account</div>
+              </div>
+            </button>
+
+            <button class="ops-nav-btn" data-subtab="subtab-transfer">
+              <div class="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center">
+                <i class="fa-solid fa-right-left"></i>
+              </div>
+              <div class="text-left">
+                <div class="font-bold text-white text-sm">Inter-Account Transfer</div>
+                <div class="text-xs text-slate-400">Atomic ACID transaction engine</div>
+              </div>
+            </button>
+          </div>
+
+          <!-- Form Area -->
+          <div class="lg:col-span-2 glass-card p-6">
+            
+            <!-- Deposit Subtab -->
+            <form id="subtab-deposit" class="ops-subtab space-y-4">
+              <div class="border-b border-slate-800 pb-3 mb-4">
+                <h4 class="font-outfit text-lg font-bold text-emerald-400 flex items-center gap-2">
+                  <i class="fa-solid fa-money-bill-wave"></i> Deposit Cash
+                </h4>
+                <p class="text-xs text-slate-400">Funds are immediately credited with zero floating-point error using Java BigDecimal.</p>
+              </div>
+
+              <div>
+                <label class="form-label">Select Account</label>
+                <select id="deposit-account" class="input-field" required>
+                  <option value="">Select an account...</option>
+                </select>
+              </div>
+
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <label class="form-label mb-0">Deposit Amount (₹)</label>
+                  <div class="flex gap-1.5">
+                    <button type="button" class="preset-btn" onclick="setPresetAmount('deposit-amount', 500)">+₹500</button>
+                    <button type="button" class="preset-btn" onclick="setPresetAmount('deposit-amount', 1000)">+₹1,000</button>
+                    <button type="button" class="preset-btn" onclick="setPresetAmount('deposit-amount', 5000)">+₹5,000</button>
+                    <button type="button" class="preset-btn" onclick="setPresetAmount('deposit-amount', 10000)">+₹10,000</button>
+                  </div>
+                </div>
+                <div class="relative">
+                  <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">₹</span>
+                  <input type="number" step="0.01" min="1" id="deposit-amount" placeholder="5000.00" class="input-field pl-8" required>
+                </div>
+              </div>
+
+              <div>
+                <label class="form-label">Remark / Description</label>
+                <input type="text" id="deposit-desc" placeholder="e.g. Salary Deposit, Cash Deposit" class="input-field">
+              </div>
+
+              <button type="submit" class="btn btn-emerald w-full py-3 text-sm font-bold shadow-lg shadow-emerald-500/20">
+                <i class="fa-solid fa-check"></i> Execute Deposit
+              </button>
+            </form>
+
+            <!-- Withdraw Subtab -->
+            <form id="subtab-withdraw" class="ops-subtab hidden space-y-4">
+              <div class="border-b border-slate-800 pb-3 mb-4">
+                <h4 class="font-outfit text-lg font-bold text-amber-400 flex items-center gap-2">
+                  <i class="fa-solid fa-hand-holding-dollar"></i> Withdraw Cash
+                </h4>
+                <p class="text-xs text-slate-400">Verifies active status and sufficient account balance prior to debiting.</p>
+              </div>
+
+              <div>
+                <label class="form-label">Select Account</label>
+                <select id="withdraw-account" class="input-field" required>
+                  <option value="">Select an account...</option>
+                </select>
+              </div>
+
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <label class="form-label mb-0">Withdrawal Amount (₹)</label>
+                  <div class="flex gap-1.5">
+                    <button type="button" class="preset-btn" onclick="setPresetAmount('withdraw-amount', 500)">₹500</button>
+                    <button type="button" class="preset-btn" onclick="setPresetAmount('withdraw-amount', 1000)">₹1,000</button>
+                    <button type="button" class="preset-btn" onclick="setPresetAmount('withdraw-amount', 5000)">₹5,000</button>
+                  </div>
+                </div>
+                <div class="relative">
+                  <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">₹</span>
+                  <input type="number" step="0.01" min="1" id="withdraw-amount" placeholder="2000.00" class="input-field pl-8" required>
+                </div>
+              </div>
+
+              <div>
+                <label class="form-label">Remark / Description</label>
+                <input type="text" id="withdraw-desc" placeholder="e.g. ATM Cash Withdrawal" class="input-field">
+              </div>
+
+              <button type="submit" class="btn btn-amber w-full py-3 text-sm font-bold shadow-lg shadow-amber-500/20">
+                <i class="fa-solid fa-check"></i> Execute Withdrawal
+              </button>
+            </form>
+
+            <!-- Transfer Subtab -->
+            <form id="subtab-transfer" class="ops-subtab hidden space-y-4">
+              <div class="border-b border-slate-800 pb-3 mb-4">
+                <h4 class="font-outfit text-lg font-bold text-indigo-400 flex items-center gap-2">
+                  <i class="fa-solid fa-right-left"></i> Atomic Money Transfer
+                </h4>
+                <p class="text-xs text-slate-400">Executes within Spring @Transactional session. Automatic rollback if any issue occurs.</p>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="form-label">From Account (Sender)</label>
+                  <select id="transfer-from" class="input-field" required>
+                    <option value="">Select sender account...</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="form-label">To Account (Receiver)</label>
+                  <select id="transfer-to" class="input-field" required>
+                    <option value="">Select receiver account...</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <label class="form-label mb-0">Transfer Amount (₹)</label>
+                  <div class="flex gap-1.5">
+                    <button type="button" class="preset-btn" onclick="setPresetAmount('transfer-amount', 1000)">₹1,000</button>
+                    <button type="button" class="preset-btn" onclick="setPresetAmount('transfer-amount', 5000)">₹5,000</button>
+                    <button type="button" class="preset-btn" onclick="setPresetAmount('transfer-amount', 15000)">₹15,000</button>
+                  </div>
+                </div>
+                <div class="relative">
+                  <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">₹</span>
+                  <input type="number" step="0.01" min="1" id="transfer-amount" placeholder="10000.00" class="input-field pl-8" required>
+                </div>
+              </div>
+
+              <div>
+                <label class="form-label">Remark / Payment Purpose</label>
+                <input type="text" id="transfer-desc" placeholder="e.g. Vendor Payment, Bill Settlement" class="input-field">
+              </div>
+
+              <button type="submit" class="btn btn-indigo w-full py-3 text-sm font-bold shadow-lg shadow-indigo-500/20">
+                <i class="fa-solid fa-paper-plane"></i> Execute Transfer
+              </button>
+            </form>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 5: TRANSACTION LEDGER -->
+      <section id="tab-ledger" class="tab-content space-y-6">
+        <div class="glass-card p-6">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+            <div>
+              <h3 class="font-outfit text-lg font-bold text-white">Transaction Audit Trail</h3>
+              <p class="text-xs text-slate-400">Query detailed transaction log records per bank account.</p>
+            </div>
+            
+            <form id="ledger-filter-form" class="flex flex-wrap items-center gap-3">
+              <select id="ledger-account-select" class="input-field text-xs w-56" required>
+                <option value="">Select Account...</option>
+              </select>
+
+              <select id="ledger-type-select" class="input-field text-xs w-36">
+                <option value="">All Types</option>
+                <option value="DEPOSIT">DEPOSIT</option>
+                <option value="WITHDRAWAL">WITHDRAWAL</option>
+                <option value="TRANSFER_IN">TRANSFER IN</option>
+                <option value="TRANSFER_OUT">TRANSFER OUT</option>
+              </select>
+
+              <button type="submit" class="btn btn-secondary text-xs">
+                <i class="fa-solid fa-filter"></i> Filter
+              </button>
+            </form>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+              <thead class="text-xs uppercase text-slate-400 bg-slate-900/60 border-b border-slate-800">
+                <tr>
+                  <th class="py-3 px-4">TXN Reference</th>
+                  <th class="py-3 px-4">Date & Time</th>
+                  <th class="py-3 px-4">Account Number</th>
+                  <th class="py-3 px-4">Type</th>
+                  <th class="py-3 px-4 text-right">Amount</th>
+                  <th class="py-3 px-4 text-right">Balance After</th>
+                  <th class="py-3 px-4">Description</th>
+                </tr>
+              </thead>
+              <tbody id="ledger-table-body" class="divide-y divide-slate-800/50">
+                <tr><td colspan="7" class="text-center py-6 text-slate-500">Select an account above to view transaction ledger...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- MODAL: ADD CUSTOMER -->
+  <div id="modal-customer" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-800">
+        <h3 class="font-outfit text-lg font-bold text-white">Create New Customer Profile</h3>
+        <button class="text-slate-400 hover:text-white text-lg" onclick="closeModal('modal-customer')">&times;</button>
+      </div>
+
+      <form id="form-customer" class="space-y-4">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="form-label">First Name *</label>
+            <input type="text" id="cust-first-name" placeholder="e.g. Prasad" class="input-field" required>
+          </div>
+          <div>
+            <label class="form-label">Last Name *</label>
+            <input type="text" id="cust-last-name" placeholder="e.g. Mahajan" class="input-field" required>
+          </div>
+        </div>
+
+        <div>
+          <label class="form-label">Email Address *</label>
+          <input type="email" id="cust-email" placeholder="e.g. prasad@example.com" class="input-field" required>
+        </div>
+
+        <div>
+          <label class="form-label">Mobile Phone Number (10 digits) *</label>
+          <input type="tel" pattern="^[6-9]\d{9}$" id="cust-phone" placeholder="e.g. 9876543210" class="input-field" required>
+        </div>
+
+        <div>
+          <label class="form-label">Residential Address</label>
+          <textarea id="cust-address" placeholder="e.g. 123 Tech Park, Pune" class="input-field h-20 resize-none"></textarea>
+        </div>
+
+        <div class="flex items-center justify-end gap-3 pt-2">
+          <button type="button" class="btn btn-secondary text-xs" onclick="closeModal('modal-customer')">Cancel</button>
+          <button type="submit" class="btn btn-primary text-xs"><i class="fa-solid fa-check"></i> Save Customer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: EDIT CUSTOMER -->
+  <div id="modal-edit-customer" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-800">
+        <h3 class="font-outfit text-lg font-bold text-amber-400">Edit Customer Profile</h3>
+        <button class="text-slate-400 hover:text-white text-lg" onclick="closeModal('modal-edit-customer')">&times;</button>
+      </div>
+
+      <form id="form-edit-customer" class="space-y-4">
+        <input type="hidden" id="edit-cust-id">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="form-label">First Name *</label>
+            <input type="text" id="edit-cust-first-name" class="input-field" required>
+          </div>
+          <div>
+            <label class="form-label">Last Name *</label>
+            <input type="text" id="edit-cust-last-name" class="input-field" required>
+          </div>
+        </div>
+
+        <div>
+          <label class="form-label">Email Address *</label>
+          <input type="email" id="edit-cust-email" class="input-field" required>
+        </div>
+
+        <div>
+          <label class="form-label">Mobile Phone Number *</label>
+          <input type="tel" id="edit-cust-phone" class="input-field" required>
+        </div>
+
+        <div>
+          <label class="form-label">Address</label>
+          <textarea id="edit-cust-address" class="input-field h-20 resize-none"></textarea>
+        </div>
+
+        <div class="flex items-center justify-end gap-3 pt-2">
+          <button type="button" class="btn btn-secondary text-xs" onclick="closeModal('modal-edit-customer')">Cancel</button>
+          <button type="submit" class="btn btn-amber text-xs"><i class="fa-solid fa-check"></i> Update Profile</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: DELETE CUSTOMER CONFIRM -->
+  <div id="modal-delete-customer" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-800">
+        <h3 class="font-outfit text-lg font-bold text-rose-400"><i class="fa-solid fa-triangle-exclamation"></i> Delete Customer</h3>
+        <button class="text-slate-400 hover:text-white text-lg" onclick="closeModal('modal-delete-customer')">&times;</button>
+      </div>
+
+      <input type="hidden" id="delete-cust-id">
+      <p class="text-sm text-slate-300 mb-6">
+        Are you sure you want to delete customer <strong id="delete-cust-name" class="text-white"></strong>? This action cannot be undone.
+      </p>
+
+      <div class="flex items-center justify-end gap-3">
+        <button type="button" class="btn btn-secondary text-xs" onclick="closeModal('modal-delete-customer')">Cancel</button>
+        <button type="button" class="btn btn-rose text-xs" onclick="executeDeleteCustomer()"><i class="fa-solid fa-trash"></i> Confirm Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: OPEN ACCOUNT -->
+  <div id="modal-account" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-800">
+        <h3 class="font-outfit text-lg font-bold text-white">Open New Bank Account</h3>
+        <button class="text-slate-400 hover:text-white text-lg" onclick="closeModal('modal-account')">&times;</button>
+      </div>
+
+      <form id="form-account" class="space-y-4">
+        <div>
+          <label class="form-label">Select Customer *</label>
+          <select id="acc-customer-id" class="input-field" required>
+            <option value="">Select a customer...</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="form-label">Account Type *</label>
+          <select id="acc-type" class="input-field" required>
+            <option value="SAVINGS">Savings Account (SAVINGS)</option>
+            <option value="CURRENT">Current Account (CURRENT)</option>
+          </select>
+        </div>
+
+        <div class="p-3 rounded-lg bg-slate-900 border border-slate-800 text-xs text-slate-400 space-y-1">
+          <div class="font-semibold text-cyan-400"><i class="fa-solid fa-circle-info"></i> Automated Setup</div>
+          <div>• Generated Account Prefix: <span class="font-mono text-slate-200">ACC...</span></div>
+          <div>• Initial Account Status: <span class="text-emerald-400 font-semibold">ACTIVE</span></div>
+        </div>
+
+        <div class="flex items-center justify-end gap-3 pt-2">
+          <button type="button" class="btn btn-secondary text-xs" onclick="closeModal('modal-account')">Cancel</button>
+          <button type="submit" class="btn btn-emerald text-xs"><i class="fa-solid fa-check"></i> Open Account</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: ACCOUNT STATEMENT -->
+  <div id="modal-statement" class="modal-backdrop hidden">
+    <div class="modal-card max-w-2xl">
+      <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-800">
+        <h3 class="font-outfit text-lg font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-file-invoice text-cyan-400"></i> Account Statement Details
+        </h3>
+        <button class="text-slate-400 hover:text-white text-lg" onclick="closeModal('modal-statement')">&times;</button>
+      </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3 rounded-xl bg-slate-900/80 border border-slate-800 mb-4 text-xs">
+        <div>
+          <span class="text-slate-400 block">Account No.</span>
+          <span id="stmt-acc-num" class="font-mono font-bold text-cyan-400"></span>
+        </div>
+        <div>
+          <span class="text-slate-400 block">Customer</span>
+          <span id="stmt-cust-name" class="font-bold text-white"></span>
+        </div>
+        <div>
+          <span class="text-slate-400 block">Type</span>
+          <span id="stmt-type" class="font-semibold text-indigo-400"></span>
+        </div>
+        <div>
+          <span class="text-slate-400 block">Current Balance</span>
+          <span id="stmt-balance" class="font-mono font-bold text-emerald-400"></span>
+        </div>
+      </div>
+
+      <div class="overflow-y-auto max-h-60 mb-4">
+        <table class="w-full text-left text-xs">
+          <thead class="uppercase text-slate-400 bg-slate-900 border-b border-slate-800 sticky top-0">
+            <tr>
+              <th class="py-2 px-3">TXN Ref</th>
+              <th class="py-2 px-3">Date</th>
+              <th class="py-2 px-3">Type</th>
+              <th class="py-2 px-3 text-right">Amount</th>
+              <th class="py-2 px-3 text-right">Balance</th>
+            </tr>
+          </thead>
+          <tbody id="stmt-table-body">
+            <tr><td colspan="5" class="text-center py-4 text-slate-500">Loading statement...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="flex items-center justify-between border-t border-slate-800 pt-3">
+        <div id="stmt-status"></div>
+        <button class="btn btn-secondary text-xs" onclick="window.print()"><i class="fa-solid fa-print"></i> Print Statement</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification System -->
+  <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-3"></div>
+
+  <script src="../src/main/resources/static/app.js"></script>
+</body>
+</html>
