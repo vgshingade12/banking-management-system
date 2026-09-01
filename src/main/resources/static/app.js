@@ -1,45 +1,61 @@
-// ApexBank Core Banking System — Enterprise Frontend Engine
+// Union Bank of India (VYOM Digital NetBanking) — Enterprise Client Engine
 
 const API_BASE = window.location.origin.includes('http') && !window.location.protocol.startsWith('file')
   ? `${window.location.origin}/api`
   : 'http://localhost:8080/api';
 
-// Global Data Caches
+// Global Caches & State
 let globalCustomers = [];
 let globalAccounts = [];
-let globalCurrentAccountTransactions = [];
+let globalPayees = [
+  { id: 1, name: 'Suresh Kumar', accountNo: 'ACC100002', ifsc: 'UBIN0532145', bankName: 'Union Bank of India', limit: 100000 },
+  { id: 2, name: 'Priya Sharma', accountNo: 'ACC100003', ifsc: 'SBIN0001234', bankName: 'State Bank of India', limit: 50000 }
+];
+
+let hiddenBalances = {}; // Track account balance visibility
+let sessionTimeSeconds = 900; // 15:00 min session timer
+let pendingTransferPayload = null; // Store payload during T-PIN confirmation
 
 // DOM Loaded Initialization
 document.addEventListener('DOMContentLoaded', () => {
   initNavigation();
-  initSubTabs();
   initForms();
   initModals();
+  initSessionTimer();
   checkApiHealth();
   refreshAllData();
 
-  // Attach Topbar Buttons safely
-  const btnRefresh = document.getElementById('btn-refresh');
-  if (btnRefresh) btnRefresh.addEventListener('click', () => {
-    refreshAllData();
-    showToast('Data refreshed successfully', 'success');
-  });
-
-  const btnQuickCust = document.getElementById('btn-quick-customer');
-  if (btnQuickCust) btnQuickCust.addEventListener('click', () => openModal('modal-customer'));
-
-  const btnQuickAcc = document.getElementById('btn-quick-account');
-  if (btnQuickAcc) btnQuickAcc.addEventListener('click', () => openModal('modal-account'));
-
-  // Search Listeners
+  // Search input listeners
   const searchCust = document.getElementById('search-customers');
   if (searchCust) searchCust.addEventListener('input', renderCustomersTable);
 
   const searchAcc = document.getElementById('search-accounts');
   if (searchAcc) searchAcc.addEventListener('input', renderAccountsTable);
+
+  const searchLedger = document.getElementById('search-ledger');
+  if (searchLedger) searchLedger.addEventListener('input', filterLedgerTable);
 });
 
-// Check API Health & Latency
+// Session Countdown Timer
+function initSessionTimer() {
+  const timerElem = document.getElementById('session-timer');
+  if (!timerElem) return;
+
+  setInterval(() => {
+    if (sessionTimeSeconds <= 0) {
+      timerElem.textContent = '00:00 EXPIRED';
+      timerElem.className = 'text-rose-400 font-bold font-mono';
+      showToast('NetBanking session expired for security. Please refresh.', 'warning');
+      return;
+    }
+    sessionTimeSeconds--;
+    const mins = String(Math.floor(sessionTimeSeconds / 60)).padStart(2, '0');
+    const secs = String(sessionTimeSeconds % 60).padStart(2, '0');
+    timerElem.textContent = `${mins}:${secs}`;
+  }, 1000);
+}
+
+// Check Backend API Health
 async function checkApiHealth() {
   const statusTag = document.getElementById('api-status-tag');
   if (!statusTag) return;
@@ -61,16 +77,18 @@ async function checkApiHealth() {
   }
 }
 
-// Global Refresh Data
+// Refresh Data from REST Endpoints
 async function refreshAllData() {
   await Promise.all([loadCustomers(), loadAccounts()]);
   updateDashboardStats();
   populateDropdowns();
+  renderAccountCards();
+  renderPayeeTable();
 }
 
 // Navigation Handling
 function initNavigation() {
-  const navButtons = document.querySelectorAll('.nav-item');
+  const navButtons = document.querySelectorAll('.nav-tab-btn');
   navButtons.forEach(btn => {
     btn.addEventListener('click', () => {
       const targetTab = btn.getAttribute('data-tab');
@@ -79,69 +97,17 @@ function initNavigation() {
   });
 }
 
-function switchTab(tabId, subtab = null) {
-  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-  const activeBtn = document.querySelector(`.nav-item[data-tab="${tabId}"]`);
+function switchTab(tabId) {
+  document.querySelectorAll('.nav-tab-btn').forEach(b => b.classList.remove('active'));
+  const activeBtn = document.querySelector(`.nav-tab-btn[data-tab="${tabId}"]`);
   if (activeBtn) activeBtn.classList.add('active');
 
   document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
   const targetContent = document.getElementById(tabId);
   if (targetContent) targetContent.classList.add('active');
-
-  // Page title update
-  const titleMap = {
-    'tab-overview': { title: 'Dashboard Overview', sub: 'Real-time telemetry and management controls for ApexBank Core.' },
-    'tab-customers': { title: 'Customer Management', sub: 'Directory of registered individual & enterprise bank clients.' },
-    'tab-accounts': { title: 'Bank Accounts Ledger', sub: 'Savings and Current account status and balance controls.' },
-    'tab-operations': { title: 'Banking Service Counter', sub: 'Execute cash deposits, withdrawals, and inter-account transfers.' },
-    'tab-ledger': { title: 'Transaction Audit Log', sub: 'Detailed transaction history and filtering per account.' }
-  };
-
-  if (titleMap[tabId]) {
-    const pageTitle = document.getElementById('page-title');
-    const pageSub = document.getElementById('page-subtitle');
-    if (pageTitle) pageTitle.textContent = titleMap[tabId].title;
-    if (pageSub) pageSub.textContent = titleMap[tabId].sub;
-  }
-
-  if (subtab) {
-    const subBtn = document.querySelector(`.ops-nav-btn[data-subtab="subtab-${subtab}"]`);
-    if (subBtn) subBtn.click();
-  }
 }
 
-// Sub-Tab Ops Handling
-function initSubTabs() {
-  const opsNavBtns = document.querySelectorAll('.ops-nav-btn');
-  opsNavBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      opsNavBtns.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-
-      const targetSubtab = btn.getAttribute('data-subtab');
-      document.querySelectorAll('.ops-subtab').forEach(s => s.classList.add('hidden'));
-      const subTarget = document.getElementById(targetSubtab);
-      if (subTarget) subTarget.classList.remove('hidden');
-    });
-  });
-}
-
-// Preset Amount Buttons Handler
-function setPresetAmount(fieldId, val) {
-  const field = document.getElementById(fieldId);
-  if (field) field.value = val;
-}
-
-// Copy to Clipboard Utility
-function copyToClipboard(text) {
-  navigator.clipboard.writeText(text).then(() => {
-    showToast(`Copied "${text}" to clipboard`, 'success');
-  }).catch(() => {
-    showToast('Failed to copy to clipboard', 'error');
-  });
-}
-
-// Load Customers from API
+// Load Customers
 async function loadCustomers() {
   try {
     const res = await fetch(`${API_BASE}/customers`);
@@ -149,17 +115,16 @@ async function loadCustomers() {
     globalCustomers = await res.json();
     renderCustomersTable();
   } catch (err) {
-    console.error('Error fetching customers:', err);
+    console.error('Customer fetch error:', err);
   }
 }
 
-// Render Customers Table
+// Render Customers Directory
 function renderCustomersTable() {
   const tbody = document.getElementById('customers-table-body');
   if (!tbody) return;
 
-  const searchElem = document.getElementById('search-customers');
-  const search = searchElem ? searchElem.value.toLowerCase().trim() : '';
+  const search = document.getElementById('search-customers')?.value.toLowerCase().trim() || '';
 
   const filtered = globalCustomers.filter(c => 
     `${c.firstName} ${c.lastName}`.toLowerCase().includes(search) ||
@@ -169,15 +134,15 @@ function renderCustomersTable() {
   );
 
   if (filtered.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-6 text-slate-500">No customers found. Click "+ Add Customer" to create one.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-6 text-slate-500">No customer records found. Click "+ Add Customer" to register one.</td></tr>`;
     return;
   }
 
   tbody.innerHTML = filtered.map(c => `
-    <tr class="hover:bg-slate-900/40 transition-colors">
+    <tr class="hover:bg-slate-900/50 transition-colors border-b border-slate-800/40">
       <td class="py-3 px-4 font-mono text-xs text-slate-400">#${c.id}</td>
-      <td class="py-3 px-4 font-mono text-xs text-cyan-400 font-bold">
-        <span class="cursor-pointer hover:underline" onclick="copyToClipboard('${c.customerCode}')" title="Click to copy code">${c.customerCode}</span>
+      <td class="py-3 px-4 font-mono text-xs text-amber-400 font-bold">
+        <span class="cursor-pointer hover:underline" onclick="copyToClipboard('${c.customerCode}')" title="Copy Customer Code">${c.customerCode}</span>
       </td>
       <td class="py-3 px-4 font-bold text-white">${escapeHtml(c.firstName)} ${escapeHtml(c.lastName)}</td>
       <td class="py-3 px-4 text-slate-300 text-xs">${escapeHtml(c.email)}</td>
@@ -187,10 +152,10 @@ function renderCustomersTable() {
         <button class="btn btn-secondary text-xs py-1 px-2.5" onclick="openAccountForCustomer(${c.id})">
           <i class="fa-solid fa-plus text-emerald-400"></i> Open Account
         </button>
-        <button class="btn btn-secondary text-xs py-1 px-2" onclick="editCustomer(${c.id})" title="Edit Customer">
+        <button class="btn btn-secondary text-xs py-1 px-2" onclick="editCustomer(${c.id})">
           <i class="fa-solid fa-pen text-amber-400"></i>
         </button>
-        <button class="btn btn-secondary text-xs py-1 px-2" onclick="confirmDeleteCustomer(${c.id}, '${escapeHtml(c.firstName)} ${escapeHtml(c.lastName)}')" title="Delete Customer">
+        <button class="btn btn-secondary text-xs py-1 px-2" onclick="confirmDeleteCustomer(${c.id}, '${escapeHtml(c.firstName)} ${escapeHtml(c.lastName)}')">
           <i class="fa-solid fa-trash text-rose-400"></i>
         </button>
       </td>
@@ -198,26 +163,24 @@ function renderCustomersTable() {
   `).join('');
 }
 
-// Load Accounts from API
+// Load Accounts
 async function loadAccounts() {
   try {
     const res = await fetch(`${API_BASE}/accounts`);
     if (!res.ok) throw new Error('Failed to fetch accounts');
     globalAccounts = await res.json();
     renderAccountsTable();
-    renderOverviewAccountsTable();
   } catch (err) {
-    console.error('Error fetching accounts:', err);
+    console.error('Accounts fetch error:', err);
   }
 }
 
-// Render Accounts Table
+// Render Accounts Master Table
 function renderAccountsTable() {
   const tbody = document.getElementById('accounts-table-body');
   if (!tbody) return;
 
-  const searchElem = document.getElementById('search-accounts');
-  const search = searchElem ? searchElem.value.toLowerCase().trim() : '';
+  const search = document.getElementById('search-accounts')?.value.toLowerCase().trim() || '';
 
   const filtered = globalAccounts.filter(a => 
     (a.accountNumber && a.accountNumber.toLowerCase().includes(search)) ||
@@ -225,75 +188,95 @@ function renderAccountsTable() {
   );
 
   if (filtered.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-6 text-slate-500">No bank accounts found. Click "+ Open New Account" to open one.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-6 text-slate-500">No bank accounts found. Click "+ Open Account" to register.</td></tr>`;
     return;
   }
 
   tbody.innerHTML = filtered.map(a => `
-    <tr class="hover:bg-slate-900/40 transition-colors">
+    <tr class="hover:bg-slate-900/50 transition-colors border-b border-slate-800/40">
       <td class="py-3 px-4 font-mono text-sm text-cyan-400 font-bold">
-        <span class="cursor-pointer hover:underline" onclick="copyToClipboard('${a.accountNumber}')" title="Click to copy account number">${a.accountNumber}</span>
+        <span class="cursor-pointer hover:underline" onclick="copyToClipboard('${a.accountNumber}')" title="Copy Account Number">${a.accountNumber}</span>
       </td>
       <td class="py-3 px-4 font-bold text-white">${escapeHtml(a.customerName)}</td>
-      <td class="py-3 px-4"><span class="badge ${a.accountType === 'SAVINGS' ? 'badge-savings' : 'badge-current'}">${a.accountType}</span></td>
+      <td class="py-3 px-4"><span class="badge ${a.accountType === 'SAVINGS' ? 'badge-active' : 'badge-closed'}">${a.accountType}</span></td>
       <td class="py-3 px-4 text-right font-mono font-bold text-emerald-400">₹${formatMoney(a.balance)}</td>
       <td class="py-3 px-4 text-center">${getStatusBadge(a.status)}</td>
       <td class="py-3 px-4 text-slate-400 text-xs">${formatDate(a.createdAt)}</td>
       <td class="py-3 px-4 text-right flex items-center justify-end gap-2">
-        <button class="btn btn-secondary text-xs py-1 px-2.5" onclick="viewAccountDetails('${a.accountNumber}')" title="View Statement">
+        <button class="btn btn-secondary text-xs py-1 px-2.5" onclick="viewAccountStatement('${a.accountNumber}')">
           <i class="fa-solid fa-receipt text-cyan-400"></i> Statement
         </button>
         <select onchange="updateAccountStatus(${a.id}, this.value)" class="bg-slate-900 border border-slate-800 rounded px-2 py-1 text-xs text-slate-300 outline-none cursor-pointer">
-          <option value="ACTIVE" ${a.status === 'ACTIVE' ? 'selected' : ''}>Active</option>
-          <option value="BLOCKED" ${a.status === 'BLOCKED' ? 'selected' : ''}>Blocked</option>
-          <option value="CLOSED" ${a.status === 'CLOSED' ? 'selected' : ''}>Closed</option>
+          <option value="ACTIVE" ${a.status === 'ACTIVE' ? 'selected' : ''}>ACTIVE</option>
+          <option value="BLOCKED" ${a.status === 'BLOCKED' ? 'selected' : ''}>BLOCKED</option>
+          <option value="CLOSED" ${a.status === 'CLOSED' ? 'selected' : ''}>CLOSED</option>
         </select>
       </td>
     </tr>
   `).join('');
 }
 
-// Render Overview Accounts Table
-function renderOverviewAccountsTable() {
-  const tbody = document.getElementById('overview-accounts-body');
-  if (!tbody) return;
+// Render Dashboard Account Summary Cards
+function renderAccountCards() {
+  const container = document.getElementById('account-cards-container');
+  if (!container) return;
 
   if (globalAccounts.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-slate-500">No accounts active yet.</td></tr>`;
+    container.innerHTML = `
+      <div class="col-span-full glass-card p-8 text-center text-slate-400">
+        <i class="fa-solid fa-wallet text-4xl text-slate-600 mb-3 block"></i>
+        No active Union Bank accounts registered yet. Click "+ Open Account" to create your first account.
+      </div>
+    `;
     return;
   }
 
-  tbody.innerHTML = globalAccounts.slice(0, 5).map(a => `
-    <tr class="hover:bg-slate-900/40 transition-colors">
-      <td class="py-3 px-4 font-mono text-sm text-cyan-400 font-bold">${a.accountNumber}</td>
-      <td class="py-3 px-4 font-bold text-white">${escapeHtml(a.customerName)}</td>
-      <td class="py-3 px-4"><span class="badge ${a.accountType === 'SAVINGS' ? 'badge-savings' : 'badge-current'}">${a.accountType}</span></td>
-      <td class="py-3 px-4 text-right font-mono font-bold text-emerald-400">₹${formatMoney(a.balance)}</td>
-      <td class="py-3 px-4 text-center">${getStatusBadge(a.status)}</td>
-      <td class="py-3 px-4 text-right">
-        <button class="btn btn-secondary text-xs py-1 px-2.5" onclick="quickSelectAccountForDeposit('${a.accountNumber}')">
-          <i class="fa-solid fa-arrow-down-left text-emerald-400"></i> Deposit
-        </button>
-      </td>
-    </tr>
-  `).join('');
+  container.innerHTML = globalAccounts.map(a => {
+    const isHidden = hiddenBalances[a.accountNumber] !== false; // Default hidden
+    const displayBalance = isHidden ? '•••• ••••' : `₹${formatMoney(a.balance)}`;
+
+    return `
+      <div class="account-card ${a.accountType === 'CURRENT' ? 'current' : ''}">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full ${a.status === 'ACTIVE' ? 'bg-emerald-400' : 'bg-rose-400'}"></span>
+            <span class="text-xs font-bold uppercase tracking-wider text-cyan-300">${a.accountType} ACCOUNT</span>
+          </div>
+          <span class="text-xs font-mono text-slate-400">IFSC: UBIN0532145</span>
+        </div>
+
+        <div class="mb-4">
+          <span class="text-xs text-slate-400 uppercase tracking-wider font-semibold block mb-1">Available Balance</span>
+          <div class="flex items-center gap-3">
+            <span class="font-mono text-2xl font-black text-white" id="card-bal-${a.accountNumber}">${displayBalance}</span>
+            <button class="text-slate-400 hover:text-amber-400 text-sm" onclick="toggleBalanceVisibility('${a.accountNumber}')" title="Toggle Show/Hide Balance">
+              <i class="fa-solid ${isHidden ? 'fa-eye' : 'fa-eye-slash'}"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between pt-3 border-t border-slate-700/50 text-xs">
+          <div>
+            <span class="text-slate-400 block">Account Number</span>
+            <span class="font-mono font-bold text-white">${a.accountNumber}</span>
+          </div>
+          <div>
+            <span class="text-slate-400 block text-right">Customer</span>
+            <span class="font-semibold text-slate-200 text-right block">${escapeHtml(a.customerName)}</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
 }
 
-// Quick Select Deposit Shortcut
-function quickSelectAccountForDeposit(accNum) {
-  switchTab('tab-operations', 'deposit');
-  const depAcc = document.getElementById('deposit-account');
-  if (depAcc) depAcc.value = accNum;
+// Toggle Balance Show/Hide Eye Button
+function toggleBalanceVisibility(accNum) {
+  hiddenBalances[accNum] = !hiddenBalances[accNum];
+  renderAccountCards();
 }
 
-// Account Status Badge Helper
-function getStatusBadge(status) {
-  if (status === 'ACTIVE') return `<span class="badge badge-active"><i class="fa-solid fa-circle text-[8px]"></i> ACTIVE</span>`;
-  if (status === 'BLOCKED') return `<span class="badge badge-blocked"><i class="fa-solid fa-lock text-[8px]"></i> BLOCKED</span>`;
-  return `<span class="badge badge-closed"><i class="fa-solid fa-circle-xmark text-[8px]"></i> CLOSED</span>`;
-}
-
-// Update Dashboard Stats
+// Update Topbar Dashboard Stats
 function updateDashboardStats() {
   const statCust = document.getElementById('stat-customers');
   if (statCust) statCust.textContent = globalCustomers.length;
@@ -306,11 +289,11 @@ function updateDashboardStats() {
   if (statLiq) statLiq.textContent = `₹${formatMoney(totalLiquidity)}`;
 }
 
-// Populate Select Dropdowns
+// Populate Dropdown Select Controls
 function populateDropdowns() {
   const customerSelect = document.getElementById('acc-customer-id');
   if (customerSelect) {
-    customerSelect.innerHTML = `<option value="">Select a customer...</option>` + globalCustomers.map(c => `
+    customerSelect.innerHTML = `<option value="">Select Customer...</option>` + globalCustomers.map(c => `
       <option value="${c.id}">${escapeHtml(c.firstName)} ${escapeHtml(c.lastName)} (${c.customerCode})</option>
     `).join('');
   }
@@ -319,7 +302,7 @@ function populateDropdowns() {
     <option value="${a.accountNumber}">${a.accountNumber} — ${escapeHtml(a.customerName)} (₹${formatMoney(a.balance)}) [${a.status}]</option>
   `).join('');
 
-  const defaultOption = `<option value="">Select an account...</option>`;
+  const defaultOption = `<option value="">Select Account...</option>`;
 
   const depAcc = document.getElementById('deposit-account');
   if (depAcc) depAcc.innerHTML = defaultOption + accountOptions;
@@ -330,16 +313,21 @@ function populateDropdowns() {
   const transFrom = document.getElementById('transfer-from');
   if (transFrom) transFrom.innerHTML = defaultOption + accountOptions;
 
-  const transTo = document.getElementById('transfer-to');
-  if (transTo) transTo.innerHTML = defaultOption + accountOptions;
-
   const ledgerAcc = document.getElementById('ledger-account-select');
   if (ledgerAcc) ledgerAcc.innerHTML = defaultOption + accountOptions;
+
+  // Payee Dropdown in Transfer
+  const payeeSelect = document.getElementById('transfer-to-payee');
+  if (payeeSelect) {
+    const payeeOptions = globalPayees.map(p => `<option value="${p.accountNo}">${p.name} (${p.accountNo} - ${p.bankName})</option>`).join('');
+    const otherAccOptions = globalAccounts.map(a => `<option value="${a.accountNumber}">${escapeHtml(a.customerName)} (${a.accountNumber})</option>`).join('');
+    payeeSelect.innerHTML = `<option value="">Select Payee or Receiver...</option>` + payeeOptions + otherAccOptions;
+  }
 }
 
-// Form Handlers Initialization
+// Form Handlers Setup
 function initForms() {
-  // Create Customer Form
+  // Create Customer
   const formCust = document.getElementById('form-customer');
   if (formCust) {
     formCust.addEventListener('submit', async (e) => {
@@ -359,9 +347,9 @@ function initForms() {
           body: JSON.stringify(payload)
         });
         const data = await res.json();
-        if (!res.ok) throw new Error(data.message || data.error || 'Failed to create customer');
+        if (!res.ok) throw new Error(data.message || data.error || 'Failed to register customer');
 
-        showToast(`Customer "${data.firstName} ${data.lastName}" created successfully!`, 'success');
+        showToast(`Customer "${data.firstName} ${data.lastName}" registered successfully!`, 'success');
         closeModal('modal-customer');
         formCust.reset();
         refreshAllData();
@@ -371,39 +359,7 @@ function initForms() {
     });
   }
 
-  // Edit Customer Form
-  const formEditCust = document.getElementById('form-edit-customer');
-  if (formEditCust) {
-    formEditCust.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const custId = document.getElementById('edit-cust-id').value;
-      const payload = {
-        firstName: document.getElementById('edit-cust-first-name').value.trim(),
-        lastName: document.getElementById('edit-cust-last-name').value.trim(),
-        email: document.getElementById('edit-cust-email').value.trim(),
-        phone: document.getElementById('edit-cust-phone').value.trim(),
-        address: document.getElementById('edit-cust-address').value.trim()
-      };
-
-      try {
-        const res = await fetch(`${API_BASE}/customers/${custId}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message || data.error || 'Failed to update customer');
-
-        showToast(`Customer profile updated successfully!`, 'success');
-        closeModal('modal-edit-customer');
-        refreshAllData();
-      } catch (err) {
-        showToast(err.message, 'error');
-      }
-    });
-  }
-
-  // Open Account Form
+  // Open Bank Account
   const formAcc = document.getElementById('form-account');
   if (formAcc) {
     formAcc.addEventListener('submit', async (e) => {
@@ -422,7 +378,7 @@ function initForms() {
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || data.error || 'Failed to open account');
 
-        showToast(`Account ${data.accountNumber} created for ${data.customerName}!`, 'success');
+        showToast(`Union Bank Account ${data.accountNumber} created for ${data.customerName}!`, 'success');
         closeModal('modal-account');
         formAcc.reset();
         refreshAllData();
@@ -432,21 +388,17 @@ function initForms() {
     });
   }
 
-  // Deposit Form
-  const subDeposit = document.getElementById('subtab-deposit');
-  if (subDeposit) {
-    subDeposit.addEventListener('submit', async (e) => {
+  // Cash Deposit
+  const formDep = document.getElementById('form-deposit');
+  if (formDep) {
+    formDep.addEventListener('submit', async (e) => {
       e.preventDefault();
       const accountNumber = document.getElementById('deposit-account').value;
       const amount = parseFloat(document.getElementById('deposit-amount').value);
-      const description = document.getElementById('deposit-desc').value.trim();
+      const description = document.getElementById('deposit-desc').value.trim() || 'Cash Deposit';
 
       if (!accountNumber) {
-        showToast('Please select a target account for deposit.', 'warning');
-        return;
-      }
-      if (isNaN(amount) || amount <= 0) {
-        showToast('Please enter a valid deposit amount greater than ₹0.', 'warning');
+        showToast('Please select an account for deposit.', 'warning');
         return;
       }
 
@@ -459,8 +411,8 @@ function initForms() {
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || data.error || 'Deposit failed');
 
-        showToast(`Deposit Successful! TXN Ref: ${data.referenceNumber}. New Balance: ₹${formatMoney(data.newBalance)}`, 'success');
-        subDeposit.reset();
+        showToast(`Deposit Successful! Ref: ${data.referenceNumber}. New Balance: ₹${formatMoney(data.newBalance)}`, 'success');
+        formDep.reset();
         refreshAllData();
       } catch (err) {
         showToast(err.message, 'error');
@@ -468,21 +420,17 @@ function initForms() {
     });
   }
 
-  // Withdrawal Form
-  const subWithdraw = document.getElementById('subtab-withdraw');
-  if (subWithdraw) {
-    subWithdraw.addEventListener('submit', async (e) => {
+  // Cash Withdrawal
+  const formWith = document.getElementById('form-withdraw');
+  if (formWith) {
+    formWith.addEventListener('submit', async (e) => {
       e.preventDefault();
       const accountNumber = document.getElementById('withdraw-account').value;
       const amount = parseFloat(document.getElementById('withdraw-amount').value);
-      const description = document.getElementById('withdraw-desc').value.trim();
+      const description = document.getElementById('withdraw-desc').value.trim() || 'Cash Withdrawal';
 
       if (!accountNumber) {
         showToast('Please select an account for withdrawal.', 'warning');
-        return;
-      }
-      if (isNaN(amount) || amount <= 0) {
-        showToast('Please enter a valid withdrawal amount.', 'warning');
         return;
       }
 
@@ -495,8 +443,8 @@ function initForms() {
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || data.error || 'Withdrawal failed');
 
-        showToast(`Withdrawal Successful! TXN Ref: ${data.referenceNumber}. New Balance: ₹${formatMoney(data.newBalance)}`, 'success');
-        subWithdraw.reset();
+        showToast(`Withdrawal Successful! Ref: ${data.referenceNumber}. New Balance: ₹${formatMoney(data.newBalance)}`, 'success');
+        formWith.reset();
         refreshAllData();
       } catch (err) {
         showToast(err.message, 'error');
@@ -504,44 +452,69 @@ function initForms() {
     });
   }
 
-  // Transfer Form
-  const subTransfer = document.getElementById('subtab-transfer');
-  if (subTransfer) {
-    subTransfer.addEventListener('submit', async (e) => {
+  // Fund Transfer (Triggers Security T-PIN Modal)
+  const formTransfer = document.getElementById('form-transfer');
+  if (formTransfer) {
+    formTransfer.addEventListener('submit', (e) => {
       e.preventDefault();
-      const payload = {
-        fromAccount: document.getElementById('transfer-from').value,
-        toAccount: document.getElementById('transfer-to').value,
-        amount: parseFloat(document.getElementById('transfer-amount').value),
-        description: document.getElementById('transfer-desc').value.trim()
-      };
+      const mode = document.querySelector('input[name="transfer-mode"]:checked')?.value || 'IMPS';
+      const fromAccount = document.getElementById('transfer-from').value;
+      const toAccount = document.getElementById('transfer-to-payee').value;
+      const amount = parseFloat(document.getElementById('transfer-amount').value);
+      const description = document.getElementById('transfer-desc').value.trim() || `${mode} Fund Transfer`;
 
-      if (!payload.fromAccount || !payload.toAccount) {
+      if (!fromAccount || !toAccount) {
         showToast('Please select both sender and receiver accounts.', 'warning');
         return;
       }
-
-      if (payload.fromAccount === payload.toAccount) {
-        showToast('Source and Destination accounts cannot be the same.', 'error');
+      if (fromAccount === toAccount) {
+        showToast('Source and Destination accounts cannot be identical.', 'error');
         return;
       }
 
-      if (isNaN(payload.amount) || payload.amount <= 0) {
-        showToast('Please enter a valid transfer amount.', 'warning');
+      pendingTransferPayload = { fromAccount, toAccount, amount, description, mode };
+
+      document.getElementById('tpin-amount-preview').textContent = `₹${formatMoney(amount)}`;
+      document.getElementById('tpin-from-preview').textContent = fromAccount;
+      document.getElementById('tpin-to-preview').textContent = toAccount;
+      document.getElementById('tpin-mode-preview').textContent = mode;
+
+      openModal('modal-tpin');
+    });
+  }
+
+  // T-PIN Confirmation Handler
+  const formTpin = document.getElementById('form-tpin');
+  if (formTpin) {
+    formTpin.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const pin = document.getElementById('tpin-input').value;
+      if (pin !== '1234' && pin.length < 4) {
+        showToast('Invalid 4-Digit Security T-PIN. Enter 1234 for demo authorization.', 'error');
         return;
       }
+
+      if (!pendingTransferPayload) return;
 
       try {
         const res = await fetch(`${API_BASE}/transactions/transfer`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
+          body: JSON.stringify({
+            fromAccount: pendingTransferPayload.fromAccount,
+            toAccount: pendingTransferPayload.toAccount,
+            amount: pendingTransferPayload.amount,
+            description: `${pendingTransferPayload.mode}: ${pendingTransferPayload.description}`
+          })
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || data.error || 'Transfer failed');
 
-        showToast(`Transfer Complete! TXN Ref: ${data.referenceNumber}. Amount: ₹${formatMoney(data.amount)} transferred.`, 'success');
-        subTransfer.reset();
+        showToast(`${pendingTransferPayload.mode} Transfer Complete! TXN Ref: ${data.referenceNumber}. Amount: ₹${formatMoney(data.amount)} transferred.`, 'success');
+        closeModal('modal-tpin');
+        document.getElementById('form-transfer').reset();
+        document.getElementById('tpin-input').value = '';
+        pendingTransferPayload = null;
         refreshAllData();
       } catch (err) {
         showToast(err.message, 'error');
@@ -549,17 +522,43 @@ function initForms() {
     });
   }
 
+  // Add Beneficiary Form
+  const formPayee = document.getElementById('form-add-payee');
+  if (formPayee) {
+    formPayee.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = document.getElementById('payee-name').value.trim();
+      const accountNo = document.getElementById('payee-account').value.trim();
+      const ifsc = document.getElementById('payee-ifsc').value.trim().toUpperCase();
+      const limit = parseFloat(document.getElementById('payee-limit').value) || 100000;
+
+      globalPayees.push({
+        id: Date.now(),
+        name,
+        accountNo,
+        ifsc,
+        bankName: ifsc.startsWith('UBIN') ? 'Union Bank of India' : 'Other Bank',
+        limit
+      });
+
+      showToast(`Beneficiary "${name}" added to Payee Directory!`, 'success');
+      closeModal('modal-add-payee');
+      formPayee.reset();
+      populateDropdowns();
+      renderPayeeTable();
+    });
+  }
+
   // Ledger Filter Form
-  const ledgerForm = document.getElementById('ledger-filter-form');
-  if (ledgerForm) {
-    ledgerForm.addEventListener('submit', async (e) => {
+  const formLedger = document.getElementById('ledger-filter-form');
+  if (formLedger) {
+    formLedger.addEventListener('submit', async (e) => {
       e.preventDefault();
       const accNum = document.getElementById('ledger-account-select').value;
-      const typeSelect = document.getElementById('ledger-type-select');
-      const type = typeSelect ? typeSelect.value : '';
+      const type = document.getElementById('ledger-type-select')?.value || '';
 
       if (!accNum) {
-        showToast('Please select an account to view transaction history.', 'warning');
+        showToast('Please select an account to view passbook statement.', 'warning');
         return;
       }
 
@@ -579,30 +578,71 @@ function initForms() {
   }
 }
 
-// Render Transaction Ledger
+// Render Payee Directory Table
+function renderPayeeTable() {
+  const tbody = document.getElementById('payee-table-body');
+  if (!tbody) return;
+
+  if (globalPayees.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-slate-500">No beneficiaries registered yet. Click "+ Add Beneficiary" above.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = globalPayees.map(p => `
+    <tr class="hover:bg-slate-900/50 border-b border-slate-800/40">
+      <td class="py-3 px-4 font-bold text-white">${escapeHtml(p.name)}</td>
+      <td class="py-3 px-4 font-mono text-xs text-cyan-400 font-bold">${p.accountNo}</td>
+      <td class="py-3 px-4 font-mono text-xs text-amber-400">${p.ifsc}</td>
+      <td class="py-3 px-4 text-xs text-slate-300">${p.bankName}</td>
+      <td class="py-3 px-4 text-right font-mono text-xs text-slate-300">₹${formatMoney(p.limit)}</td>
+      <td class="py-3 px-4 text-right flex items-center justify-end gap-2">
+        <button class="btn btn-ubi-navy text-xs py-1 px-2.5" onclick="quickTransferToPayee('${p.accountNo}')">
+          <i class="fa-solid fa-paper-plane text-cyan-400"></i> Transfer
+        </button>
+        <button class="btn btn-secondary text-xs py-1 px-2" onclick="deletePayee(${p.id})">
+          <i class="fa-solid fa-trash text-rose-400"></i>
+        </button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function quickTransferToPayee(accNo) {
+  switchTab('tab-transfer');
+  const payeeSel = document.getElementById('transfer-to-payee');
+  if (payeeSel) payeeSel.value = accNo;
+}
+
+function deletePayee(id) {
+  globalPayees = globalPayees.filter(p => p.id !== id);
+  showToast('Beneficiary removed from Payee Directory', 'success');
+  populateDropdowns();
+  renderPayeeTable();
+}
+
+// Render Passbook Ledger Table
 function renderLedgerTable(transactions) {
   const tbody = document.getElementById('ledger-table-body');
   if (!tbody) return;
 
   if (!transactions || transactions.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-6 text-slate-500">No transactions recorded for this account filter.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-6 text-slate-500">No transaction records found for this account filter.</td></tr>`;
     return;
   }
 
   tbody.innerHTML = transactions.map(t => {
     const isPositive = t.transactionType === 'DEPOSIT' || t.transactionType === 'TRANSFER_IN';
     const amountColor = isPositive ? 'text-emerald-400' : 'text-rose-400';
-    const amountPrefix = isPositive ? '+₹' : '-₹';
 
     return `
-      <tr class="hover:bg-slate-900/40 transition-colors">
+      <tr class="hover:bg-slate-900/50 border-b border-slate-800/40">
         <td class="py-3 px-4 font-mono text-xs text-cyan-400 font-bold">
           <span class="cursor-pointer hover:underline" onclick="copyToClipboard('${t.referenceNumber}')">${t.referenceNumber}</span>
         </td>
         <td class="py-3 px-4 text-slate-300 text-xs">${formatDate(t.timestamp)}</td>
         <td class="py-3 px-4 font-mono text-xs text-slate-300">${t.accountNumber}</td>
         <td class="py-3 px-4"><span class="badge ${isPositive ? 'badge-active' : 'badge-blocked'}">${t.transactionType}</span></td>
-        <td class="py-3 px-4 text-right font-mono font-bold ${amountColor}">${amountPrefix}${formatMoney(t.amount)}</td>
+        <td class="py-3 px-4 text-right font-mono font-bold ${amountColor}">${isPositive ? '+' : '-'}₹${formatMoney(t.amount)}</td>
         <td class="py-3 px-4 text-right font-mono text-slate-200">₹${formatMoney(t.balanceAfter)}</td>
         <td class="py-3 px-4 text-slate-400 text-xs">${escapeHtml(t.description || '—')}</td>
       </tr>
@@ -610,8 +650,8 @@ function renderLedgerTable(transactions) {
   }).join('');
 }
 
-// View Account Details / Statement Modal
-async function viewAccountDetails(accNum) {
+// View E-Passbook Statement Modal
+async function viewAccountStatement(accNum) {
   try {
     const res = await fetch(`${API_BASE}/accounts/number/${accNum}`);
     if (!res.ok) throw new Error('Account not found');
@@ -624,12 +664,11 @@ async function viewAccountDetails(accNum) {
     document.getElementById('stmt-cust-name').textContent = acc.customerName;
     document.getElementById('stmt-type').textContent = acc.accountType;
     document.getElementById('stmt-balance').textContent = `₹${formatMoney(acc.balance)}`;
-    document.getElementById('stmt-status').innerHTML = getStatusBadge(acc.status);
 
     const tbody = document.getElementById('stmt-table-body');
     if (tbody) {
       if (txns.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-slate-500">No transactions recorded yet.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-slate-500">No transactions recorded for this account.</td></tr>`;
       } else {
         tbody.innerHTML = txns.map(t => {
           const isPositive = t.transactionType === 'DEPOSIT' || t.transactionType === 'TRANSFER_IN';
@@ -652,44 +691,40 @@ async function viewAccountDetails(accNum) {
   }
 }
 
-// Edit Customer Modal Trigger
-function editCustomer(id) {
-  const cust = globalCustomers.find(c => c.id === id);
-  if (!cust) return;
+// Financial Calculators
+function calculateFD() {
+  const principal = parseFloat(document.getElementById('fd-amount').value) || 0;
+  const tenureMonths = parseFloat(document.getElementById('fd-tenure').value) || 12;
+  const rate = parseFloat(document.getElementById('fd-rate').value) || 7.25;
 
-  document.getElementById('edit-cust-id').value = cust.id;
-  document.getElementById('edit-cust-first-name').value = cust.firstName;
-  document.getElementById('edit-cust-last-name').value = cust.lastName;
-  document.getElementById('edit-cust-email').value = cust.email;
-  document.getElementById('edit-cust-phone').value = cust.phone;
-  document.getElementById('edit-cust-address').value = cust.address || '';
+  const interest = (principal * (rate / 100) * (tenureMonths / 12));
+  const maturity = principal + interest;
 
-  openModal('modal-edit-customer');
+  document.getElementById('fd-result-interest').textContent = `₹${formatMoney(interest)}`;
+  document.getElementById('fd-result-maturity').textContent = `₹${formatMoney(maturity)}`;
 }
 
-// Confirm Delete Customer Modal Trigger
-function confirmDeleteCustomer(id, name) {
-  document.getElementById('delete-cust-id').value = id;
-  document.getElementById('delete-cust-name').textContent = name;
-  openModal('modal-delete-customer');
-}
+function calculateEMI() {
+  const p = parseFloat(document.getElementById('emi-amount').value) || 0;
+  const annualRate = parseFloat(document.getElementById('emi-rate').value) || 8.5;
+  const tenureYears = parseFloat(document.getElementById('emi-years').value) || 5;
 
-// Delete Customer Action
-async function executeDeleteCustomer() {
-  const id = document.getElementById('delete-cust-id').value;
-  try {
-    const res = await fetch(`${API_BASE}/customers/${id}`, { method: 'DELETE' });
-    if (!res.ok) throw new Error('Failed to delete customer. Ensure customer has no open accounts.');
+  const r = annualRate / 12 / 100;
+  const n = tenureYears * 12;
 
-    showToast('Customer deleted successfully', 'success');
-    closeModal('modal-delete-customer');
-    refreshAllData();
-  } catch (err) {
-    showToast(err.message, 'error');
+  let emi = 0;
+  if (r > 0 && n > 0) {
+    emi = p * r * (Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
   }
+
+  const totalPayment = emi * n;
+  const totalInterest = totalPayment - p;
+
+  document.getElementById('emi-result-monthly').textContent = `₹${formatMoney(emi)}`;
+  document.getElementById('emi-result-total').textContent = `₹${formatMoney(totalPayment)}`;
 }
 
-// Account Status Update
+// Account Status Update via REST API
 async function updateAccountStatus(accountId, newStatus) {
   try {
     const res = await fetch(`${API_BASE}/accounts/${accountId}/status`, {
@@ -700,21 +735,36 @@ async function updateAccountStatus(accountId, newStatus) {
     const data = await res.json();
     if (!res.ok) throw new Error(data.message || 'Failed to update status');
 
-    showToast(`Account ${data.accountNumber} status changed to ${newStatus}`, 'success');
+    showToast(`Account ${data.accountNumber} status updated to ${newStatus}`, 'success');
     refreshAllData();
   } catch (err) {
     showToast(err.message, 'error');
   }
 }
 
-// Helper: Open Account For Customer Shortcut
+// Delete Customer Action
+async function executeDeleteCustomer() {
+  const id = document.getElementById('delete-cust-id').value;
+  try {
+    const res = await fetch(`${API_BASE}/customers/${id}`, { method: 'DELETE' });
+    if (!res.ok) throw new Error('Cannot delete customer with active accounts.');
+
+    showToast('Customer record deleted successfully', 'success');
+    closeModal('modal-delete-customer');
+    refreshAllData();
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+}
+
+// Open Account For Customer Shortcut
 function openAccountForCustomer(customerId) {
   openModal('modal-account');
   const custSelect = document.getElementById('acc-customer-id');
   if (custSelect) custSelect.value = customerId;
 }
 
-// Modal Toggle Helpers
+// Modal Helpers
 function initModals() {
   document.querySelectorAll('.modal-backdrop').forEach(modal => {
     modal.addEventListener('click', (e) => {
@@ -733,7 +783,19 @@ function closeModal(id) {
   if (modal) modal.classList.add('hidden');
 }
 
-// Toast System
+// Utilities
+function copyToClipboard(text) {
+  navigator.clipboard.writeText(text).then(() => {
+    showToast(`Copied "${text}" to clipboard`, 'success');
+  });
+}
+
+function getStatusBadge(status) {
+  if (status === 'ACTIVE') return `<span class="badge badge-active"><i class="fa-solid fa-circle text-[8px]"></i> ACTIVE</span>`;
+  if (status === 'BLOCKED') return `<span class="badge badge-blocked"><i class="fa-solid fa-lock text-[8px]"></i> BLOCKED</span>`;
+  return `<span class="badge badge-closed"><i class="fa-solid fa-circle-xmark text-[8px]"></i> CLOSED</span>`;
+}
+
 function showToast(message, type = 'success') {
   const container = document.getElementById('toast-container');
   if (!container) return;
@@ -756,7 +818,6 @@ function showToast(message, type = 'success') {
   }, 4500);
 }
 
-// Formatting Utilities
 function formatMoney(amount) {
   const val = parseFloat(amount) || 0;
   return val.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
