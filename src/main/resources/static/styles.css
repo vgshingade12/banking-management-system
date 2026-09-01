@@ -1,20 +1,19 @@
 /* ============================================================
-   Union Bank of India (VYOM Digital NetBanking) Theme
+   ApexBank Digital Banking — Enterprise Design System v2.0
    ============================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap');
 
 :root {
-  --ubi-navy: #0b2545;
-  --ubi-navy-dark: #07172c;
-  --ubi-blue: #002d62;
-  --ubi-red: #c1121f;
-  --ubi-red-hover: #780000;
-  --ubi-gold: #f59e0b;
-  --ubi-gold-light: #fef3c7;
-  --ubi-bg: #090d16;
-  --ubi-card-bg: rgba(15, 23, 42, 0.85);
-  --ubi-card-border: rgba(51, 65, 85, 0.6);
+  --apex-bg: #070a12;
+  --apex-navy: #0f172a;
+  --apex-indigo: #6366f1;
+  --apex-cyan: #06b6d4;
+  --apex-emerald: #10b981;
+  --apex-amber: #f59e0b;
+  --apex-rose: #f43f5e;
+  --apex-card-bg: rgba(15, 23, 42, 0.85);
+  --apex-card-border: rgba(51, 65, 85, 0.6);
   --font-main: 'Inter', sans-serif;
   --font-heading: 'Outfit', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
@@ -26,130 +25,132 @@
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: rgba(15, 23, 42, 0.8);
+  background: rgba(15, 23, 42, 0.9);
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(51, 65, 85, 0.8);
+  background: rgba(99, 102, 241, 0.6);
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--ubi-red);
+  background: #06b6d4;
 }
 
 body {
-  background-color: var(--ubi-bg);
+  background-color: var(--apex-bg);
   color: #f8fafc;
   font-family: var(--font-main);
   overflow-x: hidden;
 }
 
-/* Brand Banner Header */
+/* Top Branding Header */
 .top-bank-header {
-  background: linear-gradient(135deg, #07172c 0%, #0b2545 50%, #002d62 100%);
-  border-bottom: 2px solid var(--ubi-red);
+  background: linear-gradient(135deg, #090d16 0%, #0f172a 60%, #1e1b4b 100%);
+  border-bottom: 1px solid rgba(99, 102, 241, 0.3);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.7);
 }
 
 .sub-header-bar {
-  background: #060a12;
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(12px);
   border-bottom: 1px solid rgba(51, 65, 85, 0.6);
 }
 
 /* Glassmorphism Card */
 .glass-card {
-  background: var(--ubi-card-bg);
+  background: var(--apex-card-bg);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--ubi-card-border);
-  border-radius: 1rem;
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6);
-  transition: all 0.2s ease-in-out;
+  border: 1px solid var(--apex-card-border);
+  border-radius: 1.25rem;
+  box-shadow: 0 12px 32px -10px rgba(0, 0, 0, 0.6);
+  transition: all 0.25s ease-in-out;
 }
 
 .glass-card:hover {
-  border-color: rgba(193, 18, 31, 0.4);
+  border-color: rgba(99, 102, 241, 0.4);
+  box-shadow: 0 15px 40px -10px rgba(99, 102, 241, 0.15);
 }
 
-/* Union Bank Account Card */
+/* ApexBank Account Summary Card */
 .account-card {
-  background: linear-gradient(135deg, #0b2545 0%, #1e293b 100%);
-  border: 1px solid rgba(56, 189, 248, 0.25);
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #1e1b4b 100%);
+  border: 1px solid rgba(6, 182, 212, 0.3);
   border-radius: 1.25rem;
   padding: 1.5rem;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.6);
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.7);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
 }
 
 .account-card::before {
   content: '';
   position: absolute;
-  top: -50%;
+  top: -40%;
   right: -30%;
-  width: 250px;
-  height: 250px;
-  background: radial-gradient(circle, rgba(193, 18, 31, 0.15) 0%, transparent 70%);
+  width: 240px;
+  height: 240px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.2) 0%, transparent 70%);
   pointer-events: none;
 }
 
 .account-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 15px 35px -5px rgba(11, 37, 69, 0.6);
-  border-color: rgba(193, 18, 31, 0.5);
+  border-color: rgba(6, 182, 212, 0.6);
+  box-shadow: 0 16px 36px -8px rgba(6, 182, 212, 0.2);
 }
 
 .account-card.current {
-  background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
-  border-color: rgba(99, 102, 241, 0.3);
+  background: linear-gradient(135deg, #0f172a 0%, #172554 60%, #064e3b 100%);
+  border-color: rgba(16, 185, 129, 0.3);
 }
 
-/* Virtual Debit Card */
+/* Virtual Debit Card Visual */
 .virtual-debit-card {
   width: 100%;
   max-width: 380px;
   height: 220px;
-  border-radius: 1rem;
-  background: linear-gradient(135deg, #1e1e24 0%, #2b2d42 50%, #111116 100%);
-  border: 1px solid rgba(245, 158, 11, 0.3);
-  padding: 1.25rem;
+  border-radius: 1.25rem;
+  background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%);
+  border: 1px solid rgba(168, 85, 247, 0.4);
+  padding: 1.35rem;
   display: flex;
-  flex-col: column;
+  flex-direction: column;
   justify-content: space-between;
-  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.7);
+  box-shadow: 0 25px 50px -12px rgba(99, 102, 241, 0.3);
   position: relative;
   overflow: hidden;
   margin: 0 auto;
 }
 
 .virtual-debit-card::after {
-  content: 'RuPay';
+  content: 'VISA';
   position: absolute;
-  bottom: 1rem;
-  right: 1.25rem;
+  bottom: 1.2rem;
+  right: 1.35rem;
   font-family: var(--font-heading);
   font-weight: 900;
   font-style: italic;
-  font-size: 1.5rem;
-  color: #f59e0b;
+  font-size: 1.75rem;
+  color: #ffffff;
   letter-spacing: 1px;
 }
 
 .card-chip {
-  width: 42px;
-  height: 30px;
-  background: linear-gradient(135deg, #d4af37, #fef3c7);
+  width: 44px;
+  height: 32px;
+  background: linear-gradient(135deg, #f59e0b, #fef3c7);
   border-radius: 6px;
-  border: 1px solid #b8860b;
-  position: relative;
+  border: 1px solid #d97706;
 }
 
-/* Navigation Items */
+/* Navigation Tabs */
 .nav-tab-btn {
   display: flex;
   align-items: center;
   gap: 0.625rem;
   padding: 0.625rem 1rem;
-  border-radius: 0.625rem;
+  border-radius: 0.75rem;
   font-size: 0.875rem;
   font-weight: 600;
   color: #94a3b8;
@@ -165,13 +166,13 @@ body {
 }
 
 .nav-tab-btn.active {
-  background: linear-gradient(135deg, var(--ubi-red), #9b0d17);
-  color: white;
-  border-color: rgba(245, 158, 11, 0.4);
-  box-shadow: 0 4px 14px rgba(193, 18, 31, 0.3);
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(6, 182, 212, 0.25));
+  color: #38bdf8;
+  border-color: rgba(56, 189, 248, 0.4);
+  box-shadow: 0 4px 14px rgba(6, 182, 212, 0.15);
 }
 
-/* Action Buttons */
+/* Buttons */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -186,24 +187,44 @@ body {
   border: none;
 }
 
-.btn-ubi-red {
-  background: linear-gradient(135deg, #c1121f, #9b0d17);
+.btn-primary {
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
   color: white;
-  box-shadow: 0 4px 14px rgba(193, 18, 31, 0.3);
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.3);
 }
-.btn-ubi-red:hover {
-  background: linear-gradient(135deg, #a00e19, #780000);
+.btn-primary:hover {
+  background: linear-gradient(135deg, #4f46e5, #4338ca);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(99, 102, 241, 0.4);
+}
+
+.btn-cyan {
+  background: linear-gradient(135deg, #06b6d4, #0284c7);
+  color: white;
+  box-shadow: 0 4px 14px rgba(6, 182, 212, 0.3);
+}
+.btn-cyan:hover {
+  background: linear-gradient(135deg, #0284c7, #0369a1);
   transform: translateY(-1px);
 }
 
-.btn-ubi-navy {
-  background: linear-gradient(135deg, #0b2545, #002d62);
+.btn-emerald {
+  background: linear-gradient(135deg, #10b981, #059669);
   color: white;
-  border: 1px solid rgba(56, 189, 248, 0.3);
-  box-shadow: 0 4px 14px rgba(11, 37, 69, 0.4);
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
 }
-.btn-ubi-navy:hover {
-  background: linear-gradient(135deg, #07172c, #0b2545);
+.btn-emerald:hover {
+  background: linear-gradient(135deg, #059669, #047857);
+  transform: translateY(-1px);
+}
+
+.btn-amber {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: white;
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);
+}
+.btn-amber:hover {
+  background: linear-gradient(135deg, #d97706, #b45309);
   transform: translateY(-1px);
 }
 
@@ -215,18 +236,6 @@ body {
 .btn-secondary:hover {
   background: rgba(51, 65, 85, 0.8);
   color: white;
-}
-
-.btn-gold {
-  background: linear-gradient(135deg, #f59e0b, #d97706);
-  color: #0f172a;
-  font-weight: 700;
-  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);
-}
-.btn-gold:hover {
-  background: linear-gradient(135deg, #d97706, #b45309);
-  color: white;
-  transform: translateY(-1px);
 }
 
 /* Forms & Input Fields */
@@ -253,8 +262,8 @@ body {
 }
 
 .input-field:focus {
-  border-color: var(--ubi-red);
-  box-shadow: 0 0 0 3px rgba(193, 18, 31, 0.25);
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
 }
 
 /* Tab Management */
@@ -318,10 +327,10 @@ body {
 
 /* Security Alert Marquee */
 .security-alert-bar {
-  background: rgba(193, 18, 31, 0.1);
-  border-top: 1px solid rgba(193, 18, 31, 0.3);
-  border-bottom: 1px solid rgba(193, 18, 31, 0.3);
-  color: #fca5a5;
+  background: rgba(99, 102, 241, 0.1);
+  border-top: 1px solid rgba(99, 102, 241, 0.3);
+  border-bottom: 1px solid rgba(99, 102, 241, 0.3);
+  color: #c7d2fe;
   font-size: 0.75rem;
   padding: 0.35rem 1rem;
 }

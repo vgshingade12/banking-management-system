@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Union Bank of India — VYOM Digital NetBanking Portal</title>
+  <title>ApexBank — Core Digital Banking Portal</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="styles.css">
@@ -19,15 +19,15 @@
       
       <!-- Brand Logo -->
       <div class="flex items-center gap-3">
-        <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center text-white font-black text-2xl shadow-lg border border-amber-400/40">
+        <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-indigo-600 via-cyan-500 to-emerald-400 flex items-center justify-center text-white font-black text-2xl shadow-lg shadow-indigo-500/20 border border-cyan-400/40">
           <i class="fa-solid fa-building-columns"></i>
         </div>
         <div>
           <div class="flex items-center gap-2">
-            <h1 class="font-outfit font-extrabold text-2xl tracking-tight text-white leading-none">Union Bank <span class="text-red-500">of India</span></h1>
-            <span class="bg-amber-400 text-slate-950 text-[10px] font-black px-1.5 py-0.5 rounded tracking-wide uppercase">VYOM 2.0</span>
+            <h1 class="font-outfit font-extrabold text-2xl tracking-tight text-white leading-none">ApexBank</h1>
+            <span class="bg-gradient-to-r from-indigo-500 to-cyan-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded tracking-wide uppercase">Core v2.0</span>
           </div>
-          <p class="text-xs text-cyan-300 font-medium tracking-wider uppercase">Good People to Bank With • Corporate NetBanking</p>
+          <p class="text-xs text-cyan-400 font-medium tracking-wider uppercase">Next-Gen Digital Banking & Assets Engine</p>
         </div>
       </div>
 
@@ -35,7 +35,7 @@
       <div class="flex flex-wrap items-center gap-4 text-xs">
         <div class="bg-slate-900/80 px-3 py-1.5 rounded-lg border border-slate-800 flex items-center gap-2">
           <i class="fa-solid fa-user-shield text-emerald-400"></i>
-          <span class="text-slate-400">Welcome:</span>
+          <span class="text-slate-400">Session User:</span>
           <span class="font-bold text-white">Prasad Mahajan</span>
         </div>
 
@@ -53,7 +53,7 @@
           <span id="api-status-tag" class="text-emerald-400 font-semibold">ONLINE</span>
         </div>
 
-        <button class="btn btn-ubi-red text-xs py-1.5 px-3" onclick="showToast('Session secured. Portal active.', 'success')">
+        <button class="btn btn-primary text-xs py-1.5 px-3" onclick="showToast('Session secured. Portal active.', 'success')">
           <i class="fa-solid fa-lock"></i> Lock Session
         </button>
       </div>
@@ -64,9 +64,9 @@
   <!-- 2. SECURITY MARQUEE ADVISORY BAR -->
   <div class="security-alert-bar">
     <div class="max-w-7xl mx-auto flex items-center gap-3">
-      <span class="bg-red-600 text-white font-bold px-2 py-0.5 rounded text-[10px] uppercase tracking-wider shrink-0">RBI Advisory</span>
+      <span class="bg-indigo-600 text-white font-bold px-2 py-0.5 rounded text-[10px] uppercase tracking-wider shrink-0">Cyber Security Alert</span>
       <marquee class="font-medium">
-        ⚠️ Never share your 4-Digit T-PIN, NetBanking Password, or OTP with anyone. Union Bank of India officials will never call or SMS asking for secret credentials. Verify payee details prior to IMPS/NEFT transfers.
+        ⚠️ Never share your 4-Digit T-PIN, NetBanking Password, or OTP with anyone. ApexBank officials will never call or SMS asking for secret credentials. Verify payee details prior to IMPS/NEFT transfers.
       </marquee>
     </div>
   </div>
@@ -81,7 +81,7 @@
         <i class="fa-solid fa-money-bill-transfer"></i> Fund Transfers (IMPS/NEFT)
       </button>
       <button class="nav-tab-btn" data-tab="tab-payees">
-        <i class="fa-solid fa-address-book"></i> Beneficiary Directory
+        <i class="fa-solid fa-address-book"></i> Payees Directory
       </button>
       <button class="nav-tab-btn" data-tab="tab-customers">
         <i class="fa-solid fa-users"></i> Customers
@@ -133,7 +133,7 @@
             <i class="fa-solid fa-indian-rupee-sign text-emerald-400 text-base"></i>
           </div>
           <div class="font-outfit text-3xl font-black text-emerald-400" id="stat-liquidity">₹0.00</div>
-          <div class="text-xs text-emerald-400 mt-2 font-medium"><i class="fa-solid fa-arrow-trend-up"></i> Combined Ledger Liquidity</div>
+          <div class="text-xs text-emerald-400 mt-2 font-medium"><i class="fa-solid fa-arrow-trend-up"></i> Combined Ledger Funds</div>
         </div>
 
         <div class="glass-card p-5">
@@ -150,13 +150,13 @@
       <div>
         <div class="flex items-center justify-between mb-4">
           <h2 class="font-outfit text-xl font-bold text-white flex items-center gap-2">
-            <i class="fa-solid fa-wallet text-red-500"></i> My Accounts Summary
+            <i class="fa-solid fa-wallet text-cyan-400"></i> My Accounts Summary
           </h2>
           <div class="flex items-center gap-3">
             <button class="btn btn-secondary text-xs" onclick="openModal('modal-customer')">
               <i class="fa-solid fa-user-plus text-indigo-400"></i> Add Customer
             </button>
-            <button class="btn btn-gold text-xs" onclick="openModal('modal-account')">
+            <button class="btn btn-emerald text-xs" onclick="openModal('modal-account')">
               <i class="fa-solid fa-plus-circle"></i> Open New Account
             </button>
           </div>
@@ -167,15 +167,15 @@
         </div>
       </div>
 
-      <!-- Quick Launchpad & Bank Offers -->
+      <!-- Quick Launchpad & Apex Offers -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         <!-- Quick Actions -->
         <div class="lg:col-span-2 glass-card p-6 space-y-4">
           <h3 class="font-outfit text-lg font-bold text-white border-b border-slate-800 pb-3">Quick Banking Counter Services</h3>
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <button onclick="switchTab('tab-transfer')" class="p-4 rounded-xl bg-slate-900/80 border border-slate-800 hover:border-red-500/50 hover:bg-slate-800 transition-all text-center group">
-              <div class="w-12 h-12 rounded-xl bg-red-500/10 text-red-500 flex items-center justify-center text-xl mx-auto mb-2 group-hover:scale-110 transition-transform">
+            <button onclick="switchTab('tab-transfer')" class="p-4 rounded-xl bg-slate-900/80 border border-slate-800 hover:border-indigo-500/50 hover:bg-slate-800 transition-all text-center group">
+              <div class="w-12 h-12 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center text-xl mx-auto mb-2 group-hover:scale-110 transition-transform">
                 <i class="fa-solid fa-paper-plane"></i>
               </div>
               <span class="text-xs font-bold text-white block">IMPS Transfer</span>
@@ -208,19 +208,19 @@
           </div>
         </div>
 
-        <!-- Union Special Banner -->
-        <div class="glass-card p-6 border-amber-500/30 bg-gradient-to-br from-slate-900 via-slate-900 to-amber-950/30 flex flex-col justify-between">
+        <!-- Apex Special Banner -->
+        <div class="glass-card p-6 border-cyan-500/30 bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950/30 flex flex-col justify-between">
           <div>
             <div class="flex items-center justify-between mb-3">
-              <span class="bg-amber-400 text-slate-950 font-black text-[10px] px-2 py-0.5 rounded uppercase tracking-wider">Union Special Scheme</span>
-              <i class="fa-solid fa-sack-dollar text-amber-400 text-xl"></i>
+              <span class="bg-gradient-to-r from-indigo-500 to-cyan-500 text-white font-black text-[10px] px-2 py-0.5 rounded uppercase tracking-wider">Apex Special Scheme</span>
+              <i class="fa-solid fa-sack-dollar text-cyan-400 text-xl"></i>
             </div>
-            <h4 class="font-outfit font-extrabold text-xl text-white mb-2">Union 400 Days FD</h4>
+            <h4 class="font-outfit font-extrabold text-xl text-white mb-2">Apex High-Yield FD</h4>
             <p class="text-xs text-slate-300 leading-relaxed mb-4">
-              Earn attractive interest rate of <strong class="text-amber-400 text-sm">7.25% p.a.</strong> (7.75% for Senior Citizens) on Fixed Deposits. Instant opening via NetBanking.
+              Earn attractive interest rate of <strong class="text-cyan-400 text-sm">7.25% p.a.</strong> (7.75% for Senior Citizens) on Fixed Deposits. Instant opening via NetBanking.
             </p>
           </div>
-          <button class="btn btn-gold text-xs w-full py-2.5" onclick="switchTab('tab-calculators')">
+          <button class="btn btn-cyan text-xs w-full py-2.5" onclick="switchTab('tab-calculators')">
             <i class="fa-solid fa-calculator"></i> Calculate Returns
           </button>
         </div>
@@ -233,7 +233,7 @@
       <div class="glass-card p-6 max-w-3xl mx-auto">
         <div class="border-b border-slate-800 pb-4 mb-6">
           <h3 class="font-outfit text-xl font-bold text-white flex items-center gap-2">
-            <i class="fa-solid fa-paper-plane text-red-500"></i> Funds Transfer Counter
+            <i class="fa-solid fa-paper-plane text-cyan-400"></i> Funds Transfer Counter
           </h3>
           <p class="text-xs text-slate-400">Execute instant IMPS 24x7, NEFT, or RTGS transfers securely.</p>
         </div>
@@ -243,24 +243,24 @@
           <div>
             <label class="form-label">Select Transfer Mode</label>
             <div class="grid grid-cols-3 gap-3">
-              <label class="p-3 rounded-xl bg-slate-900 border border-slate-800 cursor-pointer flex items-center gap-2 text-xs hover:border-red-500/50">
-                <input type="radio" name="transfer-mode" value="IMPS" checked class="accent-red-600">
+              <label class="p-3 rounded-xl bg-slate-900 border border-slate-800 cursor-pointer flex items-center gap-2 text-xs hover:border-indigo-500/50">
+                <input type="radio" name="transfer-mode" value="IMPS" checked class="accent-indigo-600">
                 <div>
                   <strong class="text-white block">IMPS (Instant)</strong>
                   <span class="text-[10px] text-slate-400">24x7 Real-time</span>
                 </div>
               </label>
 
-              <label class="p-3 rounded-xl bg-slate-900 border border-slate-800 cursor-pointer flex items-center gap-2 text-xs hover:border-red-500/50">
-                <input type="radio" name="transfer-mode" value="NEFT" class="accent-red-600">
+              <label class="p-3 rounded-xl bg-slate-900 border border-slate-800 cursor-pointer flex items-center gap-2 text-xs hover:border-indigo-500/50">
+                <input type="radio" name="transfer-mode" value="NEFT" class="accent-indigo-600">
                 <div>
                   <strong class="text-white block">NEFT</strong>
                   <span class="text-[10px] text-slate-400">Half-hourly batches</span>
                 </div>
               </label>
 
-              <label class="p-3 rounded-xl bg-slate-900 border border-slate-800 cursor-pointer flex items-center gap-2 text-xs hover:border-red-500/50">
-                <input type="radio" name="transfer-mode" value="RTGS" class="accent-red-600">
+              <label class="p-3 rounded-xl bg-slate-900 border border-slate-800 cursor-pointer flex items-center gap-2 text-xs hover:border-indigo-500/50">
+                <input type="radio" name="transfer-mode" value="RTGS" class="accent-indigo-600">
                 <div>
                   <strong class="text-white block">RTGS</strong>
                   <span class="text-[10px] text-slate-400">High-value (> ₹2L)</span>
@@ -308,7 +308,7 @@
             </div>
           </div>
 
-          <button type="submit" class="btn btn-ubi-red w-full py-3 text-sm font-bold">
+          <button type="submit" class="btn btn-primary w-full py-3 text-sm font-bold">
             <i class="fa-solid fa-lock"></i> Proceed to Authorize Transfer
           </button>
         </form>
@@ -323,7 +323,7 @@
             <h3 class="font-outfit text-lg font-bold text-white">Registered Beneficiary Directory</h3>
             <p class="text-xs text-slate-400">Manage registered Payees for instant IMPS / NEFT transfers.</p>
           </div>
-          <button class="btn btn-gold text-xs" onclick="openModal('modal-add-payee')">
+          <button class="btn btn-cyan text-xs" onclick="openModal('modal-add-payee')">
             <i class="fa-solid fa-user-plus"></i> + Add New Beneficiary
           </button>
         </div>
@@ -358,7 +358,7 @@
           </div>
           <div class="flex items-center gap-3">
             <input type="text" id="search-customers" placeholder="Search customer..." class="input-field text-xs w-64">
-            <button class="btn btn-ubi-navy text-xs" onclick="openModal('modal-customer')">
+            <button class="btn btn-primary text-xs" onclick="openModal('modal-customer')">
               <i class="fa-solid fa-user-plus"></i> Add Customer
             </button>
           </div>
@@ -395,7 +395,7 @@
           </div>
           <div class="flex items-center gap-3">
             <input type="text" id="search-accounts" placeholder="Search account number..." class="input-field text-xs w-64">
-            <button class="btn btn-gold text-xs" onclick="openModal('modal-account')">
+            <button class="btn btn-emerald text-xs" onclick="openModal('modal-account')">
               <i class="fa-solid fa-plus-circle"></i> Open Account
             </button>
           </div>
@@ -444,7 +444,7 @@
               <option value="TRANSFER_OUT">TRANSFER OUT</option>
             </select>
 
-            <button type="submit" class="btn btn-ubi-navy text-xs">
+            <button type="submit" class="btn btn-secondary text-xs">
               <i class="fa-solid fa-filter"></i> Query Passbook
             </button>
           </form>
@@ -477,11 +477,11 @@
         
         <!-- Virtual Debit Card Visual -->
         <div class="glass-card p-6 flex flex-col items-center justify-center space-y-6">
-          <h3 class="font-outfit text-lg font-bold text-white">Union Bank RuPay Platinum Card</h3>
+          <h3 class="font-outfit text-lg font-bold text-white">ApexBank Visa Platinum Card</h3>
           
           <div class="virtual-debit-card">
             <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-amber-400 tracking-widest uppercase">Union Bank of India</span>
+              <span class="text-xs font-bold text-cyan-400 tracking-widest uppercase">ApexBank Platinum</span>
               <span class="text-xs font-mono text-slate-300">PLATINUM</span>
             </div>
 
@@ -512,7 +512,7 @@
                 <strong class="text-sm text-white block">Online E-Commerce Transactions</strong>
                 <span class="text-xs text-slate-400">Enable payments for online shopping</span>
               </div>
-              <input type="checkbox" checked class="w-5 h-5 accent-red-600 cursor-pointer">
+              <input type="checkbox" checked class="w-5 h-5 accent-indigo-600 cursor-pointer">
             </div>
 
             <div class="flex items-center justify-between p-3 rounded-xl bg-slate-900/80 border border-slate-800">
@@ -520,19 +520,19 @@
                 <strong class="text-sm text-white block">International Usage</strong>
                 <span class="text-xs text-slate-400">Enable cross-border ATM & Merchant transactions</span>
               </div>
-              <input type="checkbox" class="w-5 h-5 accent-red-600 cursor-pointer">
+              <input type="checkbox" class="w-5 h-5 accent-indigo-600 cursor-pointer">
             </div>
 
             <div>
               <div class="flex items-center justify-between mb-1">
                 <label class="form-label mb-0">Daily ATM Cash Limit</label>
-                <span class="font-mono text-xs text-amber-400 font-bold">₹40,000 / day</span>
+                <span class="font-mono text-xs text-cyan-400 font-bold">₹40,000 / day</span>
               </div>
-              <input type="range" min="10000" max="100000" step="5000" value="40000" class="w-full accent-red-600 cursor-pointer">
+              <input type="range" min="10000" max="100000" step="5000" value="40000" class="w-full accent-indigo-600 cursor-pointer">
             </div>
 
             <div class="pt-3 border-t border-slate-800">
-              <button class="btn btn-ubi-red w-full py-3 text-sm font-bold" onclick="showToast('Debit Card hotlisted & blocked successfully.', 'error')">
+              <button class="btn btn-primary w-full py-3 text-sm font-bold bg-rose-600 hover:bg-rose-700" onclick="showToast('Debit Card hotlisted & blocked successfully.', 'error')">
                 <i class="fa-solid fa-ban"></i> Emergency Hotlist / Block Card
               </button>
             </div>
@@ -648,7 +648,7 @@
 
         <div class="flex items-center justify-end gap-3 pt-2">
           <button type="button" class="btn btn-secondary text-xs" onclick="closeModal('modal-tpin')">Cancel</button>
-          <button type="submit" class="btn btn-ubi-red text-xs"><i class="fa-solid fa-check"></i> Authorize Payment</button>
+          <button type="submit" class="btn btn-primary text-xs"><i class="fa-solid fa-check"></i> Authorize Payment</button>
         </div>
       </form>
     </div>
@@ -675,7 +675,7 @@
 
         <div>
           <label class="form-label">Bank IFSC Code *</label>
-          <input type="text" id="payee-ifsc" placeholder="e.g. UBIN0532145" class="input-field font-mono uppercase" required>
+          <input type="text" id="payee-ifsc" placeholder="e.g. APEX0001080" class="input-field font-mono uppercase" required>
         </div>
 
         <div>
@@ -685,7 +685,7 @@
 
         <div class="flex items-center justify-end gap-3 pt-2">
           <button type="button" class="btn btn-secondary text-xs" onclick="closeModal('modal-add-payee')">Cancel</button>
-          <button type="submit" class="btn btn-gold text-xs"><i class="fa-solid fa-check"></i> Save Beneficiary</button>
+          <button type="submit" class="btn btn-cyan text-xs"><i class="fa-solid fa-check"></i> Save Beneficiary</button>
         </div>
       </form>
     </div>
@@ -707,7 +707,7 @@
         <div><label class="form-label">Email Address *</label><input type="email" id="cust-email" class="input-field" required></div>
         <div><label class="form-label">Phone Number *</label><input type="tel" id="cust-phone" class="input-field" required></div>
         <div><label class="form-label">Address</label><textarea id="cust-address" class="input-field h-20 resize-none"></textarea></div>
-        <div class="flex justify-end gap-3 pt-2"><button type="button" class="btn btn-secondary text-xs" onclick="closeModal('modal-customer')">Cancel</button><button type="submit" class="btn btn-ubi-navy text-xs">Save Customer</button></div>
+        <div class="flex justify-end gap-3 pt-2"><button type="button" class="btn btn-secondary text-xs" onclick="closeModal('modal-customer')">Cancel</button><button type="submit" class="btn btn-primary text-xs">Save Customer</button></div>
       </form>
     </div>
   </div>
@@ -716,7 +716,7 @@
   <div id="modal-account" class="modal-backdrop hidden">
     <div class="modal-card">
       <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-800">
-        <h3 class="font-outfit text-lg font-bold text-white">Open Union Bank Account</h3>
+        <h3 class="font-outfit text-lg font-bold text-white">Open ApexBank Account</h3>
         <button class="text-slate-400 hover:text-white text-lg" onclick="closeModal('modal-account')">&times;</button>
       </div>
 
@@ -734,7 +734,7 @@
           </select>
         </div>
 
-        <div class="flex justify-end gap-3 pt-2"><button type="button" class="btn btn-secondary text-xs" onclick="closeModal('modal-account')">Cancel</button><button type="submit" class="btn btn-gold text-xs">Open Account</button></div>
+        <div class="flex justify-end gap-3 pt-2"><button type="button" class="btn btn-secondary text-xs" onclick="closeModal('modal-account')">Cancel</button><button type="submit" class="btn btn-emerald text-xs">Open Account</button></div>
       </form>
     </div>
   </div>
@@ -744,7 +744,7 @@
     <div class="modal-card max-w-2xl">
       <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-800">
         <h3 class="font-outfit text-lg font-bold text-white flex items-center gap-2">
-          <i class="fa-solid fa-file-invoice text-red-500"></i> Union Bank E-Passbook Statement
+          <i class="fa-solid fa-file-invoice text-cyan-400"></i> ApexBank E-Passbook Statement
         </h3>
         <button class="text-slate-400 hover:text-white text-lg" onclick="closeModal('modal-statement')">&times;</button>
       </div>

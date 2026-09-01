@@ -1,4 +1,4 @@
-// Union Bank of India (VYOM Digital NetBanking) — Enterprise Client Engine
+// ApexBank Enterprise Core Banking Engine v2.0
 
 const API_BASE = window.location.origin.includes('http') && !window.location.protocol.startsWith('file')
   ? `${window.location.origin}/api`
@@ -8,7 +8,7 @@ const API_BASE = window.location.origin.includes('http') && !window.location.pro
 let globalCustomers = [];
 let globalAccounts = [];
 let globalPayees = [
-  { id: 1, name: 'Suresh Kumar', accountNo: 'ACC100002', ifsc: 'UBIN0532145', bankName: 'Union Bank of India', limit: 100000 },
+  { id: 1, name: 'Suresh Kumar', accountNo: 'ACC100002', ifsc: 'APEX0001080', bankName: 'ApexBank Main Branch', limit: 100000 },
   { id: 2, name: 'Priya Sharma', accountNo: 'ACC100003', ifsc: 'SBIN0001234', bankName: 'State Bank of India', limit: 50000 }
 ];
 
@@ -45,7 +45,7 @@ function initSessionTimer() {
     if (sessionTimeSeconds <= 0) {
       timerElem.textContent = '00:00 EXPIRED';
       timerElem.className = 'text-rose-400 font-bold font-mono';
-      showToast('NetBanking session expired for security. Please refresh.', 'warning');
+      showToast('ApexBank session expired for security. Please refresh.', 'warning');
       return;
     }
     sessionTimeSeconds--;
@@ -141,7 +141,7 @@ function renderCustomersTable() {
   tbody.innerHTML = filtered.map(c => `
     <tr class="hover:bg-slate-900/50 transition-colors border-b border-slate-800/40">
       <td class="py-3 px-4 font-mono text-xs text-slate-400">#${c.id}</td>
-      <td class="py-3 px-4 font-mono text-xs text-amber-400 font-bold">
+      <td class="py-3 px-4 font-mono text-xs text-cyan-400 font-bold">
         <span class="cursor-pointer hover:underline" onclick="copyToClipboard('${c.customerCode}')" title="Copy Customer Code">${c.customerCode}</span>
       </td>
       <td class="py-3 px-4 font-bold text-white">${escapeHtml(c.firstName)} ${escapeHtml(c.lastName)}</td>
@@ -225,7 +225,7 @@ function renderAccountCards() {
     container.innerHTML = `
       <div class="col-span-full glass-card p-8 text-center text-slate-400">
         <i class="fa-solid fa-wallet text-4xl text-slate-600 mb-3 block"></i>
-        No active Union Bank accounts registered yet. Click "+ Open Account" to create your first account.
+        No active ApexBank accounts registered yet. Click "+ Open Account" to create your first account.
       </div>
     `;
     return;
@@ -242,14 +242,14 @@ function renderAccountCards() {
             <span class="w-2.5 h-2.5 rounded-full ${a.status === 'ACTIVE' ? 'bg-emerald-400' : 'bg-rose-400'}"></span>
             <span class="text-xs font-bold uppercase tracking-wider text-cyan-300">${a.accountType} ACCOUNT</span>
           </div>
-          <span class="text-xs font-mono text-slate-400">IFSC: UBIN0532145</span>
+          <span class="text-xs font-mono text-slate-400">IFSC: APEX0001080</span>
         </div>
 
         <div class="mb-4">
           <span class="text-xs text-slate-400 uppercase tracking-wider font-semibold block mb-1">Available Balance</span>
           <div class="flex items-center gap-3">
             <span class="font-mono text-2xl font-black text-white" id="card-bal-${a.accountNumber}">${displayBalance}</span>
-            <button class="text-slate-400 hover:text-amber-400 text-sm" onclick="toggleBalanceVisibility('${a.accountNumber}')" title="Toggle Show/Hide Balance">
+            <button class="text-slate-400 hover:text-cyan-400 text-sm" onclick="toggleBalanceVisibility('${a.accountNumber}')" title="Toggle Show/Hide Balance">
               <i class="fa-solid ${isHidden ? 'fa-eye' : 'fa-eye-slash'}"></i>
             </button>
           </div>
@@ -378,7 +378,7 @@ function initForms() {
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || data.error || 'Failed to open account');
 
-        showToast(`Union Bank Account ${data.accountNumber} created for ${data.customerName}!`, 'success');
+        showToast(`ApexBank Account ${data.accountNumber} created for ${data.customerName}!`, 'success');
         closeModal('modal-account');
         formAcc.reset();
         refreshAllData();
@@ -537,7 +537,7 @@ function initForms() {
         name,
         accountNo,
         ifsc,
-        bankName: ifsc.startsWith('UBIN') ? 'Union Bank of India' : 'Other Bank',
+        bankName: ifsc.startsWith('APEX') ? 'ApexBank Main Branch' : 'External Bank',
         limit
       });
 
@@ -596,7 +596,7 @@ function renderPayeeTable() {
       <td class="py-3 px-4 text-xs text-slate-300">${p.bankName}</td>
       <td class="py-3 px-4 text-right font-mono text-xs text-slate-300">₹${formatMoney(p.limit)}</td>
       <td class="py-3 px-4 text-right flex items-center justify-end gap-2">
-        <button class="btn btn-ubi-navy text-xs py-1 px-2.5" onclick="quickTransferToPayee('${p.accountNo}')">
+        <button class="btn btn-primary text-xs py-1 px-2.5" onclick="quickTransferToPayee('${p.accountNo}')">
           <i class="fa-solid fa-paper-plane text-cyan-400"></i> Transfer
         </button>
         <button class="btn btn-secondary text-xs py-1 px-2" onclick="deletePayee(${p.id})">
@@ -718,7 +718,6 @@ function calculateEMI() {
   }
 
   const totalPayment = emi * n;
-  const totalInterest = totalPayment - p;
 
   document.getElementById('emi-result-monthly').textContent = `₹${formatMoney(emi)}`;
   document.getElementById('emi-result-total').textContent = `₹${formatMoney(totalPayment)}`;
